@@ -1,0 +1,16 @@
+[package]
+name = "rusty_ulid"
+version = "0.1.0"
+description = "Rust ULID (Universally Unique Lexicographically Sortable Identifier) generation and processing"
+authors = ["Joern Huxhorn <jhuxhorn@googlemail.com>"]
+repository = "https://github.com/huxi/rusty_ulid"
+license = "MIT"
+# license-file = "LICENSE"
+readme = "README.md"
+
+keywords = ["ulid", "uuid", "sortable", "identifier"]
+categories = ["data-structures","date-and-time","encoding","parsing","value-formatting"]
+
+[dependencies]
+rand = "0.4.2"
+chrono = "0.4.2"
