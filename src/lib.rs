@@ -576,6 +576,17 @@ mod tests {
         assert_eq!(Ok(ulid), result);
     }
 
+    #[test]
+    fn fn_quickstart() {
+        // Generate a ULID string
+        let ulid_string: String = new_ulid_string();
+        assert_eq!(ulid_string.len(), 26);
+
+        // Generate ULID bytes
+        let ulid_bytes: [u8; 16] = new_ulid_bytes();
+        assert_eq!(ulid_bytes.len(), 16);
+    }
+
     /*
     StepRng requires rand 0.5
     #[test]
