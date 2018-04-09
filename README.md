@@ -41,6 +41,6 @@ assert_eq!(Ok(ulid), result);
 
 ## Benchmark
 
-TODO
+Run the benchmarks by executing `cargo bench`.
 
 [ulid]: https://github.com/ulid/spec

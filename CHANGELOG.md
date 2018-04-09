@@ -5,9 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## Unreleased
 ### Added
 - This changelog.
+- Some criterion benchmarks. Run the benchmarks by executing `cargo bench`.
 
 ## 0.1.0 - 2018-04-09
 ### Added
