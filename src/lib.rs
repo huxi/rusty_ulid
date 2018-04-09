@@ -285,6 +285,7 @@ impl FromStr for Ulid {
             let part = crockford::parse_crockford(part_string)?;
             low |= part;
         } else {
+            // I have no idea how to cause this error.
             return Err(crockford::DecodingError::InvalidChar(None));
         }
 
@@ -560,6 +561,32 @@ mod tests {
         let ulid = Ulid::from_str(s).unwrap();
         assert_eq!(ulid.timestamp(), timestamp);
         assert_eq!(ulid.to_string(), expected);
+    }
+
+    #[test]
+    fn from_str_failure_too_long() {
+        let result = Ulid::from_str("012345678901234567890123456");
+        assert_eq!(result, Err(DecodingError::InvalidLength));
+    }
+
+    #[test]
+    fn from_str_failure_too_short() {
+        let result = Ulid::from_str("0123456789012345678901234");
+        assert_eq!(result, Err(DecodingError::InvalidLength));
+    }
+
+    #[test]
+    fn from_str_failure_split_1() {
+        let string = "012345678🗻0123456789012";
+        let result = Ulid::from_str(string);
+        assert_eq!(result, Err(DecodingError::InvalidChar(None)));
+    }
+
+    #[test]
+    fn from_str_failure_split_2() {
+        let string = "01234567890123456🗻89012";
+        let result = Ulid::from_str(string);
+        assert_eq!(result, Err(DecodingError::InvalidChar(None)));
     }
 
     #[test]
