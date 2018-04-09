@@ -8,6 +8,8 @@
 
 This is a Rust implementation of the [ULID][ulid] Universally Unique Lexicographically Sortable Identifiers.
 
+Take a look at the [changelog][changelog] for a detailed list of all changes.
+
 ## Quickstart
 
 ```rust
@@ -45,3 +47,4 @@ assert_eq!(Ok(ulid), result);
 Run the benchmarks by executing `cargo bench`.
 
 [ulid]: https://github.com/ulid/spec
+[changelog]: https://github.com/huxi/rusty_ulid/blob/master/CHANGELOG.md
