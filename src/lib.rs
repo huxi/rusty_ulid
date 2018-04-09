@@ -577,14 +577,14 @@ mod tests {
 
     #[test]
     fn from_str_failure_split_1() {
-        let string = "012345678🗻0123456789012";
+        let string = "012345678🦀0123456789012";
         let result = Ulid::from_str(string);
         assert_eq!(result, Err(DecodingError::InvalidChar(None)));
     }
 
     #[test]
     fn from_str_failure_split_2() {
-        let string = "01234567890123456🗻89012";
+        let string = "01234567890123456🦀89012";
         let result = Ulid::from_str(string);
         assert_eq!(result, Err(DecodingError::InvalidChar(None)));
     }
