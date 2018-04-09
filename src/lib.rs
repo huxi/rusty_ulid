@@ -1,4 +1,3 @@
-#![warn(missing_docs)]
 //! # ULID - Universally Unique Lexicographically Sortable Identifier
 //!
 //! UUID can be suboptimal for many uses-cases because:
@@ -98,6 +97,8 @@
 //!
 //! [ulidspec]: https://github.com/ulid/spec
 //! [crockford]: https://crockford.com/wrmg/base32.html
+#![doc(html_root_url = "https://docs.rs/rusty_ulid/0.1.0")]
+#![deny(missing_docs)]
 extern crate chrono;
 extern crate rand;
 
