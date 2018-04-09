@@ -97,7 +97,7 @@
 //!
 //! [ulidspec]: https://github.com/ulid/spec
 //! [crockford]: https://crockford.com/wrmg/base32.html
-#![doc(html_root_url = "https://docs.rs/rusty_ulid/0.1.0")]
+#![doc(html_root_url = "https://docs.rs/rusty_ulid/0.2.0")]
 #![deny(missing_docs)]
 extern crate chrono;
 extern crate rand;
