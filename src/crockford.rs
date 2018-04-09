@@ -411,6 +411,7 @@ mod tests {
             DecodingError::InvalidChar(Some('U')),
             "invalid character 'U'",
         );
+        single_decoding_error_display_trait(DecodingError::DataTypeOverflow, "data type overflow");
     }
 
     fn single_decoding_error_display_trait(error: DecodingError, expected_result: &str) {
