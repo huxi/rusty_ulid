@@ -66,11 +66,13 @@ pub enum DecodingError {
 
 impl Error for DecodingError {
     fn description(&self) -> &str {
+        let result;
         match *self {
-            DecodingError::InvalidLength => "invalid length",
-            DecodingError::InvalidChar(_) => "invalid character",
-            DecodingError::DataTypeOverflow => "data type overflow",
+            DecodingError::InvalidLength => result = "invalid length",
+            DecodingError::InvalidChar(_) => result = "invalid character",
+            DecodingError::DataTypeOverflow => result = "data type overflow",
         }
+        result
     }
 
     fn cause(&self) -> Option<&Error> {
