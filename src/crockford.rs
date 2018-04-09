@@ -59,6 +59,9 @@ pub enum DecodingError {
     ///
     /// [crockford]: https://crockford.com/wrmg/base32.html
     InvalidChar(Option<char>),
+
+    /// Parsing the string overflowed the result value bits.
+    DataTypeOverflow,
 }
 
 impl Error for DecodingError {
@@ -66,6 +69,7 @@ impl Error for DecodingError {
         match *self {
             DecodingError::InvalidLength => "invalid length",
             DecodingError::InvalidChar(_) => "invalid character",
+            DecodingError::DataTypeOverflow => "data type overflow",
         }
     }
 
@@ -174,16 +178,30 @@ pub fn append_crockford(value: u64, count: u8, to_append_to: &mut String) {
 /// ```
 ///
 /// # Errors
-/// Parsing a string longer than 12 characters would cause an `u64` overflow.
+/// Parsing a string longer than 13 characters would cause an `u64` overflow.
 /// Trying to do so results in `InvalidLength`.
 ///
 /// ```
 /// # use rusty_ulid::crockford::*;
-/// let nope = parse_crockford("1234567890123");
+/// let nope = parse_crockford("12345678901234");
 ///
 /// assert_eq!(Err(DecodingError::InvalidLength), nope);
 /// ```
 ///
+/// Parsing a 13 character works if the `u64` does not overflow.
+/// Overflowing the `u64` results in `DataTypeOverflow`.
+///
+/// ```
+/// # use rusty_ulid::crockford::*;
+/// let yep = parse_crockford("FZZZZZZZZZZZZ");
+///
+/// assert_eq!(Ok(0xFFFF_FFFF_FFFF_FFFF), yep);
+///
+/// let nope = parse_crockford("G000000000000");
+///
+/// assert_eq!(Err(DecodingError::DataTypeOverflow), nope);
+/// ```
+//
 /// Parsing a string containing an invalid character results in `InvalidChar`.
 ///
 /// ```
@@ -194,9 +212,8 @@ pub fn append_crockford(value: u64, count: u8, to_append_to: &mut String) {
 /// ```
 pub fn parse_crockford(input: &str) -> Result<u64, DecodingError> {
     let length = input.len() as u64;
-    if length > 12 {
-        // more than 12 characters would exceed u64
-        // TODO: handle 13 characters with overflow check
+    if length > 13 {
+        // more than 13 characters would exceed u64
         return Err(DecodingError::InvalidLength);
     }
 
@@ -208,8 +225,10 @@ pub fn parse_crockford(input: &str) -> Result<u64, DecodingError> {
             return Err(DecodingError::InvalidChar(Some(current_char)));
         }
         if let Some(value) = DECODING_DIGITS[index] {
+            if length == 13 && i == 0 && (value & 0b10000) != 0 {
+                return Err(DecodingError::DataTypeOverflow);
+            }
             result |= (u64::from(value)) << ((length - (i as u64) - 1) * MASK_BITS);
-        // TODO: handle 13 characters with overflow check
         } else {
             return Err(DecodingError::InvalidChar(Some(current_char)));
         }
@@ -370,10 +389,12 @@ mod tests {
         single_parse_crockford(MAX_TIMESTAMP_PART, Ok(MAX_TIMESTAMP));
 
         single_parse_crockford("ZZZZZZZZZZZZ", Ok(0xFFF_FFFF_FFFF_FFFF));
+        single_parse_crockford("FZZZZZZZZZZZZ", Ok(0xFFFF_FFFF_FFFF_FFFF));
+        single_parse_crockford("G000000000000", Err(DecodingError::DataTypeOverflow));
 
         single_parse_crockford("U", Err(DecodingError::InvalidChar(Some('U'))));
 
-        single_parse_crockford("1234567890123", Err(DecodingError::InvalidLength));
+        single_parse_crockford("12345678901234", Err(DecodingError::InvalidLength));
     }
 
     fn single_parse_crockford(value: &str, expected_result: Result<u64, DecodingError>) {

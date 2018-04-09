@@ -60,12 +60,41 @@
 //! r is Randomness (16 characters)
 //! ```
 //!
-//! #### Encoding
+//! ### Encoding
 //!
 //! [Crockford's Base32][crockford] is used as shown.
 //! This alphabet excludes the letters I, L, O, and U to avoid confusion and abuse.
 //!
 //! `0123456789ABCDEFGHJKMNPQRSTVWXYZ`
+//!
+//! ### Overflow Errors when Parsing Base32 Strings
+//!
+//! Technically, a 26-character Base32 encoded string can contain 130 bits of
+//! information, whereas a ULID must only contain 128 bits. Therefore, the largest
+//! valid ULID encoded in Base32 is `7ZZZZZZZZZZZZZZZZZZZZZZZZZ`, which corresponds to
+//! an epoch time of `281474976710655` or `2 ^ 48 - 1`.
+//!
+//! Any attempt to decode or encode a ULID larger than this should be rejected by all
+//! implementations, to prevent overflow bugs.
+//!
+//! ### Binary Layout and Byte Order
+//!
+//! The components are encoded as 16 octets. Each component is encoded with the
+//! Most Significant Byte first (network byte order).
+//!
+//! ```text
+//! 0                   1                   2                   3
+//!  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+//! +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//! |                      32_bit_uint_time_high                    |
+//! +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//! |     16_bit_uint_time_low      |       16_bit_uint_random      |
+//! +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//! |                       32_bit_uint_random                      |
+//! +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//! |                       32_bit_uint_random                      |
+//! +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//! ```
 //!
 //! [ulidspec]: https://github.com/ulid/spec
 //! [crockford]: https://crockford.com/wrmg/base32.html
@@ -143,12 +172,18 @@ impl Ulid {
     /// // every ulid has exactly 26 characters
     /// assert_eq!(ulid_string.len(), 26);
     /// ```
+    ///
+    /// # Panics
+    ///
+    /// Panics if called after `+10889-08-02 05:31:50.655 UTC`.
     pub fn new() -> Ulid {
         Ulid::from_timestamp_with_rng(unix_epoch_ms(), &mut rand::thread_rng())
     }
 
     /// Creates a new ULID with the given `timestamp` obtaining randomness from
     /// `rng`.
+    ///
+    /// # Examples
     ///
     /// ```
     /// // TODO: works in nightly and beta but not in stable. wat?
@@ -163,10 +198,18 @@ impl Ulid {
     /// assert_eq!(timestamp, 0);
     /// */
     /// ```
+    ///
+    /// # Panics
+    ///
+    /// Panics if `timestamp` is larger than `0xFFFF_FFFF_FFFF`.
     pub fn from_timestamp_with_rng<R>(timestamp: u64, rng: &mut R) -> Ulid
     where
         R: rand::Rng,
     {
+        if (timestamp & 0xFFFF_0000_0000_0000) != 0 {
+            // timestamp is after +10889-08-02 05:31:50.655 UTC
+            panic!("ULID does not support timestamps after +10889-08-02 05:31:50.655 UTC");
+        }
         Ulid(
             timestamp << 16 | u64::from(rng.gen::<u16>()),
             rng.gen::<u64>(),
@@ -175,6 +218,8 @@ impl Ulid {
 
     /// Returns the timestamp of this ULID as number
     /// of non-leap milliseconds since January 1, 1970 0:00:00 UTC (aka "UNIX timestamp").
+    ///
+    /// # Examples
     ///
     /// ```
     /// # use std::error::Error;
@@ -198,6 +243,8 @@ impl Ulid {
     }
 
     /// Returns the timestamp of this ULID as a `DateTime<Utc>`.
+    ///
+    /// # Examples
     ///
     /// ```
     /// # use std::error::Error;
@@ -268,7 +315,11 @@ impl FromStr for Ulid {
         let mut low: u64;
 
         if let Some(time_string) = s.get(0..10) {
-            high = crockford::parse_crockford(time_string)? << 16;
+            let time_bits = crockford::parse_crockford(time_string)?;
+            if (time_bits & 0xFFFF_0000_0000_0000) != 0 {
+                return Err(crockford::DecodingError::DataTypeOverflow);
+            }
+            high = time_bits << 16;
         } else {
             return Err(crockford::DecodingError::InvalidChar(None));
         }
@@ -515,6 +566,9 @@ mod tests {
             &(MIN_TIMESTAMP_PART.to_owned() + "123456789ABCDEFG"),
             MIN_TIMESTAMP,
         );
+
+        let largest_legal_ulid_string = "7ZZZZZZZZZZZZZZZZZZZZZZZZZ";
+        single_from_string_to_string(largest_legal_ulid_string, MAX_TIMESTAMP);
     }
 
     fn single_from_string_to_string(s: &str, timestamp: u64) {
@@ -587,6 +641,19 @@ mod tests {
         let string = "01234567890123456🦀89012";
         let result = Ulid::from_str(string);
         assert_eq!(result, Err(DecodingError::InvalidChar(None)));
+    }
+
+    #[test]
+    fn from_str_failure_overflow() {
+        let smallest_overflowing_ulid_string = "80000000000000000000000000";
+        let result = Ulid::from_str(smallest_overflowing_ulid_string);
+        assert_eq!(result, Err(DecodingError::DataTypeOverflow));
+    }
+
+    #[test]
+    #[should_panic(expected = "ULID does not support timestamps after +10889-08-02 05:31:50.655 UTC")]
+    fn y10889_bug() {
+        Ulid::from_timestamp_with_rng(0x0001_0000_0000_0000, &mut rand::thread_rng());
     }
 
     #[test]
