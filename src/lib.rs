@@ -1,3 +1,5 @@
+#![doc(html_root_url = "https://docs.rs/rusty_ulid/0.2.1")]
+#![deny(missing_docs)]
 //! # ULID - Universally Unique Lexicographically Sortable Identifier
 //!
 //! UUID can be suboptimal for many uses-cases because:
@@ -97,8 +99,6 @@
 //!
 //! [ulidspec]: https://github.com/ulid/spec
 //! [crockford]: https://crockford.com/wrmg/base32.html
-#![doc(html_root_url = "https://docs.rs/rusty_ulid/0.2.0")]
-#![deny(missing_docs)]
 extern crate chrono;
 extern crate rand;
 
@@ -201,7 +201,7 @@ impl Ulid {
     /// # Panics
     ///
     /// Panics if `timestamp` is larger than `0xFFFF_FFFF_FFFF`.
-    // https://users.rust-lang.org/t/i-have-a-strange-documentation-test-issue-related-to-extern-crate/16709 
+    // https://users.rust-lang.org/t/i-have-a-strange-documentation-test-issue-related-to-extern-crate/16709
     pub fn from_timestamp_with_rng<R>(timestamp: u64, rng: &mut R) -> Ulid
     where
         R: rand::Rng,
