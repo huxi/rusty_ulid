@@ -187,22 +187,21 @@ impl Ulid {
     /// # Examples
     ///
     /// ```
-    /// // TODO: works in nightly and beta but not in stable. wat?
-    /// // https://users.rust-lang.org/t/i-have-a-strange-documentation-test-issue-related-to-extern-crate/16709
-    /// /*
     /// extern crate rand;
     /// # extern crate rusty_ulid;
     /// # use rusty_ulid::Ulid;
+    /// # fn main() {
     /// let ulid = Ulid::from_timestamp_with_rng(0, &mut rand::thread_rng());
     ///
     /// let timestamp = ulid.timestamp();
     /// assert_eq!(timestamp, 0);
-    /// */
+    /// # }
     /// ```
     ///
     /// # Panics
     ///
     /// Panics if `timestamp` is larger than `0xFFFF_FFFF_FFFF`.
+    // https://users.rust-lang.org/t/i-have-a-strange-documentation-test-issue-related-to-extern-crate/16709 
     pub fn from_timestamp_with_rng<R>(timestamp: u64, rng: &mut R) -> Ulid
     where
         R: rand::Rng,
