@@ -42,6 +42,18 @@ let result = Ulid::from_str(&ulid_string);
 assert_eq!(Ok(ulid), result);
 ```
 
+```rust
+extern crate rusty_ulid;
+use rusty_ulid::Ulid;
+
+// Alternative way to parse a ULID string
+// This example assumes a function returning a Result.
+let ulid: Ulid = "01CAT3X5Y5G9A62FH1FA6T9GVR".parse()?;
+
+let datetime = ulid.datetime();
+assert_eq!(datetime.to_string(), "2018-04-11 10:27:03.749 UTC");
+```
+
 ## Benchmark
 
 Run the benchmarks by executing `cargo bench`.

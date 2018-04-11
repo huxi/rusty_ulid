@@ -681,6 +681,22 @@ mod tests {
         assert_eq!(ulid_bytes.len(), 16);
     }
 
+    #[test]
+    fn parse_quickstart() {
+        internal_parse_quickstart().unwrap();
+    }
+
+    fn internal_parse_quickstart() -> Result<(), Box<std::error::Error>> {
+        // Alternative way to parse a ULID string
+        // This example assumes a function returning a Result.
+        let ulid: Ulid = "01CAT3X5Y5G9A62FH1FA6T9GVR".parse()?;
+
+        let datetime = ulid.datetime();
+        assert_eq!(datetime.to_string(), "2018-04-11 10:27:03.749 UTC");
+
+        Ok(())
+    }
+
     /*
     StepRng requires rand 0.5
     #[test]
