@@ -1,5 +1,5 @@
 #![doc(html_root_url = "https://docs.rs/rusty_ulid/0.2.1")]
-#![deny(missing_docs)]
+#![deny(warnings, missing_docs)]
 //! # ULID - Universally Unique Lexicographically Sortable Identifier
 //!
 //! UUID can be suboptimal for many uses-cases because:
