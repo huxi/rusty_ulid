@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## Unreleased
 ### Added
 - `parse()` quickstart example.
+- Derived `Ord`, `Eq` and `Hash` traits for `Ulid`.
 
 ## 0.2.1 - 2018-04-10
 ### Fixed

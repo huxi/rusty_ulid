@@ -153,7 +153,7 @@ pub fn new_ulid_bytes() -> [u8; 16] {
     Ulid::new().into()
 }
 
-#[derive(Debug, Default, PartialOrd, PartialEq, Copy, Clone)]
+#[derive(Debug, Default, PartialOrd, Ord, PartialEq, Eq, Copy, Clone, Hash)]
 /// The ULID data type.
 pub struct Ulid(pub u64, pub u64);
 
@@ -648,6 +648,80 @@ mod tests {
         let smallest_overflowing_ulid_string = "80000000000000000000000000";
         let result = Ulid::from_str(smallest_overflowing_ulid_string);
         assert_eq!(result, Err(DecodingError::DataTypeOverflow));
+    }
+
+    #[test]
+    fn eq_cmp_sanity_checks() {
+        // yes, this is pretty paranoid.
+
+        use std::cmp::Ordering;
+
+        let ulid_one_low = Ulid(0, 1);
+        let ulid_two_low = Ulid(0, 2);
+        let ulid_one_high = Ulid(1, 0);
+
+        let ulid_one_low_other = Ulid(0, 1);
+
+        assert!(ulid_one_low == ulid_one_low);
+        assert_eq!(ulid_one_low.eq(&ulid_one_low), true);
+        assert_eq!(ulid_one_low.cmp(&ulid_one_low), Ordering::Equal);
+
+        assert!(ulid_one_low == ulid_one_low_other);
+        assert_eq!(ulid_one_low.eq(&ulid_one_low_other), true);
+        assert_eq!(ulid_one_low.cmp(&ulid_one_low_other), Ordering::Equal);
+
+        assert!(ulid_one_low != ulid_two_low);
+        assert!(ulid_two_low != ulid_one_low);
+        assert!(ulid_one_low < ulid_two_low);
+        assert!(ulid_two_low > ulid_one_low);
+        assert_eq!(ulid_one_low.eq(&ulid_two_low), false);
+        assert_eq!(ulid_two_low.eq(&ulid_one_low), false);
+        assert_eq!(ulid_one_low.cmp(&ulid_two_low), Ordering::Less);
+        assert_eq!(ulid_two_low.cmp(&ulid_one_low), Ordering::Greater);
+
+        assert!(ulid_one_low != ulid_one_high);
+        assert!(ulid_one_high != ulid_one_low);
+        assert_eq!(ulid_one_low.eq(&ulid_one_high), false);
+        assert_eq!(ulid_one_high.eq(&ulid_one_low), false);
+        assert_eq!(ulid_one_low.cmp(&ulid_one_high), Ordering::Less);
+        assert_eq!(ulid_one_high.cmp(&ulid_one_low), Ordering::Greater);
+    }
+
+    #[test]
+    fn hash_sanity_checks() {
+        // yes, this is also pretty paranoid.
+
+        use std::collections::hash_map::DefaultHasher;
+        use std::hash::{Hash, Hasher};
+
+        let ulid_one_low = Ulid(0, 1);
+        let ulid_two_low = Ulid(0, 2);
+        let ulid_one_high = Ulid(1, 0);
+
+        let ulid_one_low_other = Ulid(0, 1);
+
+        let mut hasher_one_low = DefaultHasher::new();
+        ulid_one_low.hash(&mut hasher_one_low);
+        let hash_one_low = hasher_one_low.finish();
+
+        let mut hasher_one_low_other = DefaultHasher::new();
+        ulid_one_low_other.hash(&mut hasher_one_low_other);
+        let hash_one_low_other = hasher_one_low_other.finish();
+
+        let mut hasher_two_low = DefaultHasher::new();
+        ulid_two_low.hash(&mut hasher_two_low);
+        let hash_two_low = hasher_two_low.finish();
+
+        let mut hasher_one_high = DefaultHasher::new();
+        ulid_one_high.hash(&mut hasher_one_high);
+        let hash_one_high = hasher_one_high.finish();
+
+        // this must be true
+        assert_eq!(hash_one_low, hash_one_low_other);
+
+        // this should be true in case of a reasonable DefaultHasher implementation
+        assert_ne!(hash_one_low, hash_two_low);
+        assert_ne!(hash_one_low, hash_one_high);
     }
 
     #[test]
