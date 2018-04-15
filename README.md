@@ -66,14 +66,14 @@ Install the executable by executing `cargo install` or `cargo install --force` i
 
 Just calling the executable generates a ULID.
 
-```text
+```console
 $ rusty_ulid
 01CB2EM1J4EMBWRBJK877TM17S
 ```
 
 Calling the executable with `-v` or `--verbose` generates a ULID and prints its timestamp.
 
-```text
+```console
 $ rusty_ulid -v
 01CB2EMMMV8P51SCR9ZH8K64CX
 2018-04-14 16:08:33.691 UTC
@@ -81,7 +81,7 @@ $ rusty_ulid -v
 
 Calling the executable with any number of ULIDs checks them for validity and returns `0` if they are all fine...
 
-```text
+```console
 $ rusty_ulid 01CB2EM1J4EMBWRBJK877TM17S 01CB2EMMMV8P51SCR9ZH8K64CX
 $ echo $?
 0
@@ -89,7 +89,7 @@ $ echo $?
 
 ... or `1` if any given value is invalid, printing the invalid values to `err`.
 
-```text
+```console
 $ rusty_ulid 01CB2EM1J4EMBWRBJK877TM17S foo 01CB2EMMMV8P51SCR9ZH8K64CX
 Invalid ULID strings: ["foo"]
 $ echo $?
@@ -98,7 +98,7 @@ $ echo $?
 
 In addition to that, `-v` or `--verbose` will print the ULIDs with their respective timestamp.
 
-```text
+```console
 $ rusty_ulid -v 01CB2EM1J4EMBWRBJK877TM17S foo 01CB2EMMMV8P51SCR9ZH8K64CX
 01CB2EM1J4EMBWRBJK877TM17S
 2018-04-14 16:08:14.148 UTC
