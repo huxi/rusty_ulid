@@ -7,9 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 ### Added
-- Proper `rusty_ulid` executable functionality including example usage documentation.
 - `parse()` quickstart example.
 - Derived `Ord`, `Eq` and `Hash` traits for `Ulid`.
+- Proper `rusty_ulid` executable functionality including example usage documentation.
+- Apache-2.0 license. This crate is now dual-licensed.
 
 ## 0.2.1 - 2018-04-10
 ### Fixed
