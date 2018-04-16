@@ -78,7 +78,7 @@
 //! #### Timestamp
 //! - 48 bit integer
 //! - UNIX-time in milliseconds
-//! - Won't run out of space till the year 10895 AD.
+//! - Won't run out of space until `+10889-08-02T05:31:50.655Z`.
 //!
 //! #### Randomness
 //! - 80 bits
@@ -215,7 +215,7 @@ impl Ulid {
     ///
     /// # Panics
     ///
-    /// Panics if called after `+10889-08-02 05:31:50.655 UTC`.
+    /// Panics if called after `+10889-08-02T05:31:50.655Z`.
     pub fn new() -> Ulid {
         Ulid::from_timestamp_with_rng(unix_epoch_ms(), &mut rand::thread_rng())
     }
@@ -246,8 +246,7 @@ impl Ulid {
         R: rand::Rng,
     {
         if (timestamp & 0xFFFF_0000_0000_0000) != 0 {
-            // timestamp is after +10889-08-02 05:31:50.655 UTC
-            panic!("ULID does not support timestamps after +10889-08-02 05:31:50.655 UTC");
+            panic!("ULID does not support timestamps after +10889-08-02T05:31:50.655Z");
         }
         Ulid(
             timestamp << 16 | u64::from(rng.gen::<u16>()),
@@ -764,7 +763,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "ULID does not support timestamps after +10889-08-02 05:31:50.655 UTC")]
+    #[should_panic(expected = "ULID does not support timestamps after +10889-08-02T05:31:50.655Z")]
     fn y10889_bug() {
         Ulid::from_timestamp_with_rng(0x0001_0000_0000_0000, &mut rand::thread_rng());
     }
