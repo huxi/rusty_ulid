@@ -37,18 +37,17 @@
  * limitations under the License.
  */
 
-#![deny(warnings)]
+#![deny(warnings, missing_docs)]
+#![allow(dead_code)]
+
+//! # Command line tool for generating and validating ULIDs
+
 extern crate chrono;
 extern crate rusty_ulid;
 
-/// Contains functions for encoding and decoding of
-/// [crockford Base32][crockford] strings.
-///
-/// [crockford]: https://crockford.com/wrmg/base32.html
-pub mod crockford;
+mod crockford;
 
-pub use rusty_ulid::Ulid;
-pub use rusty_ulid::new_ulid_string;
+use rusty_ulid::Ulid;
 use std::str::FromStr;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
