@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Panic message is now using proper ISO 8601 formatting for overflow datetime
   `+10889-08-02T05:31:50.655Z`.
 
+### Removed
+- `Copy` trait from `Ulid`.
+
 ## 0.2.1 - 2018-04-10
 ### Fixed
 - Documentation test of `Ulid::from_timestamp_with_rng`.

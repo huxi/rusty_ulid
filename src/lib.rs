@@ -192,7 +192,7 @@ pub fn new_ulid_bytes() -> [u8; 16] {
     Ulid::new().into()
 }
 
-#[derive(Debug, Default, PartialOrd, Ord, PartialEq, Eq, Copy, Clone, Hash)]
+#[derive(Debug, Default, PartialOrd, Ord, PartialEq, Eq, Clone, Hash)]
 /// The ULID data type.
 pub struct Ulid(pub u64, pub u64);
 
