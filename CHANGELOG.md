@@ -7,12 +7,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 ### Added
+- `append_crockford_u128` and `parse_crockford_u128`.
 - `parse()` quickstart example.
 - Derived `Ord`, `Eq` and `Hash` traits for `Ulid`.
 - Proper `rusty_ulid` executable functionality including example usage documentation.
 - Apache-2.0 license. This crate is now dual-licensed.
 
 ### Changed
+- A `Ulid` is now using an `u128` instead of being a `(u64, u64)`. This is a breaking change
+  if you previously accessed the tuple elements directly.
+- `DecodingError::InvalidChar` now contains a `char` instead of `Option<char>`.
+- `append_crockford` was renamed to `append_crockford_u64`.
+- `parse_crockford` was renamed to `parse_crockford_u64`.
 - Panic message is now using proper ISO 8601 formatting for overflow datetime
   `+10889-08-02T05:31:50.655Z`.
 

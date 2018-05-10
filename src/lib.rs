@@ -141,9 +141,9 @@
 extern crate chrono;
 extern crate rand;
 
+use chrono::prelude::{DateTime, TimeZone, Utc};
 use std::fmt;
 use std::str::FromStr;
-use chrono::prelude::{DateTime, TimeZone, Utc};
 
 /// Contains functions for encoding and decoding of
 /// [crockford Base32][crockford] strings.
@@ -194,7 +194,9 @@ pub fn new_ulid_bytes() -> [u8; 16] {
 
 #[derive(Debug, Default, PartialOrd, Ord, PartialEq, Eq, Clone, Hash)]
 /// The ULID data type.
-pub struct Ulid(pub u64, pub u64);
+pub struct Ulid {
+    value: u128,
+}
 
 impl Ulid {
     /// Creates a new ULID.
@@ -205,8 +207,7 @@ impl Ulid {
     /// # use rusty_ulid::Ulid;
     /// let ulid = Ulid::new();
     ///
-    /// // ulid.0 contains the timestamp so it will never be 0.
-    /// assert_ne!(0, ulid.0);
+    /// assert_ne!(0, ulid.timestamp());
     ///
     /// let ulid_string = ulid.to_string();
     /// // every ulid has exactly 26 characters
@@ -248,10 +249,13 @@ impl Ulid {
         if (timestamp & 0xFFFF_0000_0000_0000) != 0 {
             panic!("ULID does not support timestamps after +10889-08-02T05:31:50.655Z");
         }
-        Ulid(
-            timestamp << 16 | u64::from(rng.gen::<u16>()),
-            rng.gen::<u64>(),
-        )
+
+        #[cfg_attr(rustfmt, rustfmt_skip)]
+        let value = (u128::from(timestamp) << 80)
+            | (u128::from(rng.gen::<u16>()) << 64)
+            | u128::from(rng.gen::<u64>());
+
+        Ulid { value }
     }
 
     /// Returns the timestamp of this ULID as number
@@ -277,7 +281,7 @@ impl Ulid {
     /// # }
     /// ```
     pub fn timestamp(&self) -> u64 {
-        self.0 >> 16
+        (self.value >> 80) as u64
     }
 
     /// Returns the timestamp of this ULID as a `DateTime<Utc>`.
@@ -315,21 +319,19 @@ impl Ulid {
     ///
     /// ```
     /// # use rusty_ulid::Ulid;
-    /// let ulid = Ulid(0, 0);
+    /// let ulid = Ulid::from(0);
     /// assert_eq!(ulid.to_string(), "00000000000000000000000000");
     /// ```
     ///
     /// ```
     /// # use rusty_ulid::Ulid;
-    /// let ulid = Ulid(0xFFFF_FFFF_FFFF_FFFF, 0xFFFF_FFFF_FFFF_FFFF);
+    /// let ulid = Ulid::from(0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF);
     /// assert_eq!(ulid.to_string(), "7ZZZZZZZZZZZZZZZZZZZZZZZZZ");
     /// ```
     pub fn to_string(&self) -> String {
         let mut string = String::with_capacity(26);
 
-        crockford::append_crockford(self.timestamp(), 10, &mut string);
-        crockford::append_crockford(((self.0 & 0xFFFF) << 24) | (self.1 >> 40), 8, &mut string);
-        crockford::append_crockford(self.1, 8, &mut string);
+        crockford::append_crockford_u128(self.value, 26, &mut string);
 
         string
     }
@@ -349,36 +351,9 @@ impl FromStr for Ulid {
             return Err(crockford::DecodingError::InvalidLength);
         }
 
-        let mut high: u64;
-        let mut low: u64;
+        let value = crockford::parse_crockford_u128(s)?;
 
-        if let Some(time_string) = s.get(0..10) {
-            let time_bits = crockford::parse_crockford(time_string)?;
-            if (time_bits & 0xFFFF_0000_0000_0000) != 0 {
-                return Err(crockford::DecodingError::DataTypeOverflow);
-            }
-            high = time_bits << 16;
-        } else {
-            return Err(crockford::DecodingError::InvalidChar(None));
-        }
-
-        if let Some(part_string) = s.get(10..18) {
-            let part = crockford::parse_crockford(part_string)?;
-            high |= part >> 24;
-            low = part << 40;
-        } else {
-            return Err(crockford::DecodingError::InvalidChar(None));
-        }
-
-        if let Some(part_string) = s.get(18..) {
-            let part = crockford::parse_crockford(part_string)?;
-            low |= part;
-        } else {
-            // I have no idea how to cause this error.
-            return Err(crockford::DecodingError::InvalidChar(None));
-        }
-
-        Ok(Ulid(high, low))
+        Ok(Ulid { value })
     }
 }
 
@@ -394,7 +369,7 @@ impl From<[u8; 16]> for Ulid {
     ///
     /// let ulid = Ulid::from(bytes);
     ///
-    /// let expected_ulid = Ulid(0x1122_3344_5566_7788, 0x99AA_BBCC_DDEE_F00F);
+    /// let expected_ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
     ///
     /// assert_eq!(ulid, expected_ulid);
     /// ```
@@ -408,32 +383,30 @@ impl From<[u8; 16]> for Ulid {
     ///
     /// let ulid : Ulid = bytes.into();
     ///
-    /// let expected_ulid = Ulid(0x1122_3344_5566_7788, 0x99AA_BBCC_DDEE_F00F);
+    /// let expected_ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
     ///
     /// assert_eq!(ulid, expected_ulid);
     /// ```
     fn from(bytes: [u8; 16]) -> Self {
         #[cfg_attr(rustfmt, rustfmt_skip)]
-        let high = u64::from(bytes[0]) << 56
-            | u64::from(bytes[1]) << 48
-            | u64::from(bytes[2]) << 40
-            | u64::from(bytes[3]) << 32
-            | u64::from(bytes[4]) << 24
-            | u64::from(bytes[5]) << 16
-            | u64::from(bytes[6]) << 8
-            | u64::from(bytes[7]);
+        let value = u128::from(bytes[0]) << 120
+            | u128::from(bytes[1]) << 112
+            | u128::from(bytes[2]) << 104
+            | u128::from(bytes[3]) << 96
+            | u128::from(bytes[4]) << 88
+            | u128::from(bytes[5]) << 80
+            | u128::from(bytes[6]) << 72
+            | u128::from(bytes[7]) << 64
+            | u128::from(bytes[8]) << 56
+            | u128::from(bytes[9]) << 48
+            | u128::from(bytes[10]) << 40
+            | u128::from(bytes[11]) << 32
+            | u128::from(bytes[12]) << 24
+            | u128::from(bytes[13]) << 16
+            | u128::from(bytes[14]) << 8
+            | u128::from(bytes[15]);
 
-        #[cfg_attr(rustfmt, rustfmt_skip)]
-        let low = u64::from(bytes[8]) << 56
-            | u64::from(bytes[9]) << 48
-            | u64::from(bytes[10]) << 40
-            | u64::from(bytes[11]) << 32
-            | u64::from(bytes[12]) << 24
-            | u64::from(bytes[13]) << 16
-            | u64::from(bytes[14]) << 8
-            | u64::from(bytes[15]);
-
-        Ulid(high, low)
+        Ulid { value }
     }
 }
 
@@ -442,7 +415,7 @@ impl From<Ulid> for [u8; 16] {
     ///
     /// ```
     /// # use rusty_ulid::Ulid;
-    /// let ulid = Ulid(0x1122_3344_5566_7788, 0x99AA_BBCC_DDEE_F00F);
+    /// let ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
     ///
     /// let bytes = <[u8; 16]>::from(ulid);
     ///
@@ -456,7 +429,7 @@ impl From<Ulid> for [u8; 16] {
     ///
     /// ```
     /// # use rusty_ulid::Ulid;
-    /// let ulid = Ulid(0x1122_3344_5566_7788, 0x99AA_BBCC_DDEE_F00F);
+    /// let ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
     ///
     /// let bytes: [u8; 16] = ulid.into();
     ///
@@ -468,25 +441,26 @@ impl From<Ulid> for [u8; 16] {
     /// assert_eq!(bytes, expected_bytes);
     /// ```
     fn from(ulid: Ulid) -> Self {
+        let value = ulid.value;
+
         #[cfg_attr(rustfmt, rustfmt_skip)]
         [
-            ((ulid.0 >> 56) & 0xff) as u8,
-            ((ulid.0 >> 48) & 0xff) as u8,
-            ((ulid.0 >> 40) & 0xff) as u8,
-            ((ulid.0 >> 32) & 0xff) as u8,
-            ((ulid.0 >> 24) & 0xff) as u8,
-            ((ulid.0 >> 16) & 0xff) as u8,
-            ((ulid.0 >> 8) & 0xff) as u8,
-            (ulid.0 & 0xff) as u8,
-
-            ((ulid.1 >> 56) & 0xff) as u8,
-            ((ulid.1 >> 48) & 0xff) as u8,
-            ((ulid.1 >> 40) & 0xff) as u8,
-            ((ulid.1 >> 32) & 0xff) as u8,
-            ((ulid.1 >> 24) & 0xff) as u8,
-            ((ulid.1 >> 16) & 0xff) as u8,
-            ((ulid.1 >> 8) & 0xff) as u8,
-            (ulid.1 & 0xff) as u8,
+            ((value >> 120) & 0xff) as u8,
+            ((value >> 112) & 0xff) as u8,
+            ((value >> 104) & 0xff) as u8,
+            ((value >> 96) & 0xff) as u8,
+            ((value >> 88) & 0xff) as u8,
+            ((value >> 80) & 0xff) as u8,
+            ((value >> 72) & 0xff) as u8,
+            ((value >> 64) & 0xff) as u8,
+            ((value >> 56) & 0xff) as u8,
+            ((value >> 48) & 0xff) as u8,
+            ((value >> 40) & 0xff) as u8,
+            ((value >> 32) & 0xff) as u8,
+            ((value >> 24) & 0xff) as u8,
+            ((value >> 16) & 0xff) as u8,
+            ((value >> 8) & 0xff) as u8,
+            (value & 0xff) as u8,
         ]
     }
 }
@@ -500,7 +474,7 @@ impl From<(u64, u64)> for Ulid {
     ///
     /// let ulid = Ulid::from(tuple);
     ///
-    /// let expected_ulid = Ulid(0x1122_3344_5566_7788, 0x99AA_BBCC_DDEE_F00F);
+    /// let expected_ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
     ///
     /// assert_eq!(ulid, expected_ulid);
     /// ```
@@ -511,12 +485,13 @@ impl From<(u64, u64)> for Ulid {
     ///
     /// let ulid : Ulid = tuple.into();
     ///
-    /// let expected_ulid = Ulid(0x1122_3344_5566_7788, 0x99AA_BBCC_DDEE_F00F);
+    /// let expected_ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
     ///
     /// assert_eq!(ulid, expected_ulid);
     /// ```
     fn from(tuple: (u64, u64)) -> Self {
-        Ulid(tuple.0, tuple.1)
+        let value = u128::from(tuple.0) << 64 | u128::from(tuple.1);
+        Ulid { value }
     }
 }
 
@@ -525,7 +500,7 @@ impl From<Ulid> for (u64, u64) {
     ///
     /// ```
     /// # use rusty_ulid::Ulid;
-    /// let ulid = Ulid(0x1122_3344_5566_7788, 0x99AA_BBCC_DDEE_F00F);
+    /// let ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
     ///
     /// let tuple = <(u64, u64)>::from(ulid);
     ///
@@ -536,7 +511,7 @@ impl From<Ulid> for (u64, u64) {
     ///
     /// ```
     /// # use rusty_ulid::Ulid;
-    /// let ulid = Ulid(0x1122_3344_5566_7788, 0x99AA_BBCC_DDEE_F00F);
+    /// let ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
     ///
     /// let tuple : (u64, u64) = ulid.into();
     ///
@@ -545,7 +520,68 @@ impl From<Ulid> for (u64, u64) {
     /// assert_eq!(tuple, expected_tuple);
     /// ```
     fn from(ulid: Ulid) -> Self {
-        (ulid.0, ulid.1)
+        (
+            (ulid.value >> 64) as u64,
+            (ulid.value & 0xFFFF_FFFF_FFFF_FFFF) as u64,
+        )
+    }
+}
+
+impl From<u128> for Ulid {
+    /// # Examples
+    ///
+    /// ```
+    /// # use rusty_ulid::Ulid;
+    /// let value = 0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F;
+    ///
+    /// let ulid = Ulid::from(value);
+    ///
+    /// let expected_ulid = Ulid::from((0x1122_3344_5566_7788, 0x99AA_BBCC_DDEE_F00F));
+    ///
+    /// assert_eq!(ulid, expected_ulid);
+    /// ```
+    ///
+    /// ```
+    /// # use rusty_ulid::Ulid;
+    /// let value = 0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F;
+    ///
+    /// let ulid : Ulid = value.into();
+    ///
+    /// let expected_ulid = Ulid::from((0x1122_3344_5566_7788, 0x99AA_BBCC_DDEE_F00F));
+    ///
+    /// assert_eq!(ulid, expected_ulid);
+    /// ```
+    fn from(value: u128) -> Self {
+        Ulid { value }
+    }
+}
+
+impl From<Ulid> for u128 {
+    /// # Examples
+    ///
+    /// ```
+    /// # use rusty_ulid::Ulid;
+    /// let ulid = Ulid::from((0x1122_3344_5566_7788, 0x99AA_BBCC_DDEE_F00F));
+    ///
+    /// let value = <u128>::from(ulid);
+    ///
+    /// let expected_value = 0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F;
+    ///
+    /// assert_eq!(value, expected_value);
+    /// ```
+    ///
+    /// ```
+    /// # use rusty_ulid::Ulid;
+    /// let ulid = Ulid::from((0x1122_3344_5566_7788, 0x99AA_BBCC_DDEE_F00F));
+    ///
+    /// let value : u128 = ulid.into();
+    ///
+    /// let expected_value = 0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F;
+    ///
+    /// assert_eq!(value, expected_value);
+    /// ```
+    fn from(ulid: Ulid) -> Self {
+        ulid.value
     }
 }
 
@@ -657,28 +693,21 @@ mod tests {
 
     #[test]
     fn from_str_failure_too_long() {
-        let result = Ulid::from_str("012345678901234567890123456");
+        let result = Ulid::from_str("123456789012345678901234567");
         assert_eq!(result, Err(DecodingError::InvalidLength));
     }
 
     #[test]
     fn from_str_failure_too_short() {
-        let result = Ulid::from_str("0123456789012345678901234");
+        let result = Ulid::from_str("1234567890123456789012345");
         assert_eq!(result, Err(DecodingError::InvalidLength));
     }
 
     #[test]
-    fn from_str_failure_split_1() {
+    fn from_str_failure_invalid_unicode() {
         let string = "012345678🦀0123456789012";
         let result = Ulid::from_str(string);
-        assert_eq!(result, Err(DecodingError::InvalidChar(None)));
-    }
-
-    #[test]
-    fn from_str_failure_split_2() {
-        let string = "01234567890123456🦀89012";
-        let result = Ulid::from_str(string);
-        assert_eq!(result, Err(DecodingError::InvalidChar(None)));
+        assert_eq!(result, Err(DecodingError::InvalidChar('🦀')));
     }
 
     #[test]
@@ -694,11 +723,11 @@ mod tests {
 
         use std::cmp::Ordering;
 
-        let ulid_one_low = Ulid(0, 1);
-        let ulid_two_low = Ulid(0, 2);
-        let ulid_one_high = Ulid(1, 0);
+        let ulid_one_low: Ulid = (0, 1).into();
+        let ulid_two_low: Ulid = (0, 2).into();
+        let ulid_one_high: Ulid = (1, 0).into();
 
-        let ulid_one_low_other = Ulid(0, 1);
+        let ulid_one_low_other: Ulid = (0, 1).into();
 
         assert!(ulid_one_low == ulid_one_low);
         assert_eq!(ulid_one_low.eq(&ulid_one_low), true);
@@ -732,11 +761,11 @@ mod tests {
         use std::collections::hash_map::DefaultHasher;
         use std::hash::{Hash, Hasher};
 
-        let ulid_one_low = Ulid(0, 1);
-        let ulid_two_low = Ulid(0, 2);
-        let ulid_one_high = Ulid(1, 0);
+        let ulid_one_low: Ulid = (0, 1).into();
+        let ulid_two_low: Ulid = (0, 2).into();
+        let ulid_one_high: Ulid = (1, 0).into();
 
-        let ulid_one_low_other = Ulid(0, 1);
+        let ulid_one_low_other: Ulid = (0, 1).into();
 
         let mut hasher_one_low = DefaultHasher::new();
         ulid_one_low.hash(&mut hasher_one_low);
