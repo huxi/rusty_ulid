@@ -805,4 +805,11 @@ mod tests {
         let result = format!("{}", error);
         assert_eq!(result, expected_result)
     }
+
+    #[test]
+    fn decoding_error_causes() {
+        assert!(DecodingError::InvalidLength.cause().is_none());
+        assert!(DecodingError::InvalidChar('a').cause().is_none());
+        assert!(DecodingError::DataTypeOverflow.cause().is_none());
+    }
 }
