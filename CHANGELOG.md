@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+### Added
+- `append_crockford_u64_tuple` and `parse_crockford_u64_tuple`.
+
+### Changed
+- A `Ulid` is now using a private `(u64, u64)` instead of being a `u128`. This is a non-breaking change.
+- Using `rand 0.5.0` dependency.
+
+### Fixed
+- Performance regression. This version is faster than `0.2.0`, even with `rand 0.4.2`.
+
 ## 0.3.0 - 2018-05-12
 ### Added
 - Conversion of `Ulid` to and from `u128`.

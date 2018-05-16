@@ -8,14 +8,16 @@
 
 This is a Rust implementation of the [ULID][ulid] Universally Unique Lexicographically Sortable Identifiers.
 
-This crate requires **Rust 1.26 or later** because it is using `u128`.
+This crate requires **Rust 1.26 or later** because it is supporting `u128`.
 
 Take a look at the [changelog][changelog] for a detailed list of all changes.
 
 ## Features
 - lenient parsing of ULID strings as specified in [Crockford Base32 Encoding][crockford].
 - straight-forward creation of string and binary ULIDs.
-- backed by `u128` for efficiency.
+- conversion to and from `[u8; 16]`.
+- conversion to and from `(u64, u64)`.
+- conversion to and from `u128`.
 
 ## Quickstart
 

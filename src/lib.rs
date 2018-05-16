@@ -157,7 +157,7 @@ pub use crockford::DecodingError;
 fn unix_epoch_ms() -> u64 {
     let now: DateTime<Utc> = Utc::now();
 
-    now.timestamp() as u64 * 1000 + u64::from(now.timestamp_subsec_millis())
+    now.timestamp_millis() as u64
 }
 
 /// Returns a new ULID string.
@@ -195,7 +195,7 @@ pub fn new_ulid_bytes() -> [u8; 16] {
 #[derive(Debug, Default, PartialOrd, Ord, PartialEq, Eq, Clone, Hash)]
 /// The ULID data type.
 pub struct Ulid {
-    value: u128,
+    value: (u64, u64),
 }
 
 impl Ulid {
@@ -251,9 +251,9 @@ impl Ulid {
         }
 
         #[cfg_attr(rustfmt, rustfmt_skip)]
-        let value = (u128::from(timestamp) << 80)
-            | (u128::from(rng.gen::<u16>()) << 64)
-            | u128::from(rng.gen::<u64>());
+        let high = timestamp << 16 | u64::from(rng.gen::<u16>());
+        let low = rng.gen::<u64>();
+        let value = (high, low);
 
         Ulid { value }
     }
@@ -281,7 +281,7 @@ impl Ulid {
     /// # }
     /// ```
     pub fn timestamp(&self) -> u64 {
-        (self.value >> 80) as u64
+        (self.value.0 >> 16) as u64
     }
 
     /// Returns the timestamp of this ULID as a `DateTime<Utc>`.
@@ -331,7 +331,7 @@ impl Ulid {
     pub fn to_string(&self) -> String {
         let mut string = String::with_capacity(26);
 
-        crockford::append_crockford_u128(self.value, 26, &mut string);
+        crockford::append_crockford_u64_tuple(self.value, &mut string);
 
         string
     }
@@ -347,11 +347,7 @@ impl FromStr for Ulid {
     type Err = crockford::DecodingError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if s.len() != 26 {
-            return Err(crockford::DecodingError::InvalidLength);
-        }
-
-        let value = crockford::parse_crockford_u128(s)?;
+        let value = crockford::parse_crockford_u64_tuple(s)?;
 
         Ok(Ulid { value })
     }
@@ -389,23 +385,26 @@ impl From<[u8; 16]> for Ulid {
     /// ```
     fn from(bytes: [u8; 16]) -> Self {
         #[cfg_attr(rustfmt, rustfmt_skip)]
-        let value = u128::from(bytes[0]) << 120
-            | u128::from(bytes[1]) << 112
-            | u128::from(bytes[2]) << 104
-            | u128::from(bytes[3]) << 96
-            | u128::from(bytes[4]) << 88
-            | u128::from(bytes[5]) << 80
-            | u128::from(bytes[6]) << 72
-            | u128::from(bytes[7]) << 64
-            | u128::from(bytes[8]) << 56
-            | u128::from(bytes[9]) << 48
-            | u128::from(bytes[10]) << 40
-            | u128::from(bytes[11]) << 32
-            | u128::from(bytes[12]) << 24
-            | u128::from(bytes[13]) << 16
-            | u128::from(bytes[14]) << 8
-            | u128::from(bytes[15]);
+        let high = u64::from(bytes[0]) << 56
+            | u64::from(bytes[1]) << 48
+            | u64::from(bytes[2]) << 40
+            | u64::from(bytes[3]) << 32
+            | u64::from(bytes[4]) << 24
+            | u64::from(bytes[5]) << 16
+            | u64::from(bytes[6]) << 8
+            | u64::from(bytes[7]);
 
+        #[cfg_attr(rustfmt, rustfmt_skip)]
+        let low = u64::from(bytes[8]) << 56
+            | u64::from(bytes[9]) << 48
+            | u64::from(bytes[10]) << 40
+            | u64::from(bytes[11]) << 32
+            | u64::from(bytes[12]) << 24
+            | u64::from(bytes[13]) << 16
+            | u64::from(bytes[14]) << 8
+            | u64::from(bytes[15]);
+
+        let value = (high, low);
         Ulid { value }
     }
 }
@@ -445,22 +444,23 @@ impl From<Ulid> for [u8; 16] {
 
         #[cfg_attr(rustfmt, rustfmt_skip)]
         [
-            ((value >> 120) & 0xff) as u8,
-            ((value >> 112) & 0xff) as u8,
-            ((value >> 104) & 0xff) as u8,
-            ((value >> 96) & 0xff) as u8,
-            ((value >> 88) & 0xff) as u8,
-            ((value >> 80) & 0xff) as u8,
-            ((value >> 72) & 0xff) as u8,
-            ((value >> 64) & 0xff) as u8,
-            ((value >> 56) & 0xff) as u8,
-            ((value >> 48) & 0xff) as u8,
-            ((value >> 40) & 0xff) as u8,
-            ((value >> 32) & 0xff) as u8,
-            ((value >> 24) & 0xff) as u8,
-            ((value >> 16) & 0xff) as u8,
-            ((value >> 8) & 0xff) as u8,
-            (value & 0xff) as u8,
+            ((value.0 >> 56) & 0xff) as u8,
+            ((value.0 >> 48) & 0xff) as u8,
+            ((value.0 >> 40) & 0xff) as u8,
+            ((value.0 >> 32) & 0xff) as u8,
+            ((value.0 >> 24) & 0xff) as u8,
+            ((value.0 >> 16) & 0xff) as u8,
+            ((value.0 >> 8) & 0xff) as u8,
+            (value.0 & 0xff) as u8,
+            
+            ((value.1 >> 56) & 0xff) as u8,
+            ((value.1 >> 48) & 0xff) as u8,
+            ((value.1 >> 40) & 0xff) as u8,
+            ((value.1 >> 32) & 0xff) as u8,
+            ((value.1 >> 24) & 0xff) as u8,
+            ((value.1 >> 16) & 0xff) as u8,
+            ((value.1 >> 8) & 0xff) as u8,
+            (value.1 & 0xff) as u8,
         ]
     }
 }
@@ -489,8 +489,7 @@ impl From<(u64, u64)> for Ulid {
     ///
     /// assert_eq!(ulid, expected_ulid);
     /// ```
-    fn from(tuple: (u64, u64)) -> Self {
-        let value = u128::from(tuple.0) << 64 | u128::from(tuple.1);
+    fn from(value: (u64, u64)) -> Self {
         Ulid { value }
     }
 }
@@ -520,10 +519,7 @@ impl From<Ulid> for (u64, u64) {
     /// assert_eq!(tuple, expected_tuple);
     /// ```
     fn from(ulid: Ulid) -> Self {
-        (
-            (ulid.value >> 64) as u64,
-            (ulid.value & 0xFFFF_FFFF_FFFF_FFFF) as u64,
-        )
+        ulid.value
     }
 }
 
@@ -552,6 +548,7 @@ impl From<u128> for Ulid {
     /// assert_eq!(ulid, expected_ulid);
     /// ```
     fn from(value: u128) -> Self {
+        let value = ((value >> 64) as u64, (value & 0xFFFF_FFFF_FFFF_FFFF) as u64);
         Ulid { value }
     }
 }
@@ -581,7 +578,7 @@ impl From<Ulid> for u128 {
     /// assert_eq!(value, expected_value);
     /// ```
     fn from(ulid: Ulid) -> Self {
-        ulid.value
+        u128::from(ulid.value.0) << 64 | u128::from(ulid.value.1)
     }
 }
 
