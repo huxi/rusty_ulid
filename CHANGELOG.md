@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - A `Ulid` is now using a private `(u64, u64)` instead of being a `u128`. This is a non-breaking change.
 - Using `rand 0.5.0` dependency.
+- `append_crockford_u128` appends exactly 26 characters.
+- `parse_crockford_u128` requires exactly 26 characters.
+
+### Removed
+- `append_crockford_u64` and `parse_crockford_u64`.
 
 ### Fixed
 - Performance regression. This version is faster than `0.2.0`, even with `rand 0.4.2`.

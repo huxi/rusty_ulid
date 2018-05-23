@@ -144,218 +144,69 @@ impl fmt::Display for DecodingError {
     }
 }
 
-const MASK_BITS: usize = 5;
 const MASK_U64: u64 = 0b11111;
 const MASK_U128: u128 = 0b11111;
 
-/// Appends `count` number of [crockford Base32][crockford] digits to `to_append_to`.
-///
-/// [crockford]: https://crockford.com/wrmg/base32.html
-///
-/// Only `count` values up to 13 make sense since that will exhaust all the bits
-/// of the given `value`. Higher `count` values will simply prepend additional `0`s.
-///
-/// # Examples
-///
-/// ```
-/// # use rusty_ulid::crockford::*;
-/// let mut a_string = String::new();
-/// append_crockford_u64(1, 1, &mut a_string);
-/// assert_eq!(a_string, "1");
-/// ```
-///
-/// ```
-/// # use rusty_ulid::crockford::*;
-/// let mut a_string = String::new();
-/// append_crockford_u64(0xFF, 4, &mut a_string);
-/// assert_eq!(a_string, "007Z");
-/// ```
-///
-/// ```
-/// # use rusty_ulid::crockford::*;
-/// let mut a_string = String::new();
-/// append_crockford_u64(0xFFFF_FFFF_FFFF_FFFF, 13, &mut a_string);
-/// assert_eq!(a_string, "FZZZZZZZZZZZZ");
-/// ```
-///
-/// ```
-/// # use rusty_ulid::crockford::*;
-/// let mut a_string = String::new();
-/// append_crockford_u64(0xFFFF_FFFF_FFFF_FFFF, 14, &mut a_string);
-/// assert_eq!(a_string, "0FZZZZZZZZZZZZ");
-/// ```
-pub fn append_crockford_u64(value: u64, count: u8, to_append_to: &mut String) {
-    let count = usize::from(count);
-
-    for i in 0..count {
-        let shift_bits = (count - i - 1) * MASK_BITS;
-
-        let index = if shift_bits < 64 {
-            ((value >> shift_bits) & MASK_U64) as usize
-        } else {
-            0
-        };
-
-        to_append_to.push(ENCODING_DIGITS[index]);
-    }
-}
-
-/// Parses the given [crockford Base32][crockford] string into a `u64`.
+/// Appends the [crockford Base32][crockford] representation of the `u128` to `to_append_to`.
 ///
 /// [crockford]: https://crockford.com/wrmg/base32.html
 ///
 /// # Examples
-/// ```
-/// # use rusty_ulid::crockford::*;
-/// let parsed = parse_crockford_u64("7Z");
-///
-/// assert_eq!(Ok(0xFF), parsed);
-/// ```
-///
-/// When decoding, upper and lower case letters are accepted,
-/// `i` and `l` will be treated as `1` and `o` will be treated as `0`.
-///
-/// ```
-/// # use std::error::Error;
-/// # use rusty_ulid::crockford::*;
-/// #
-/// # fn try_main() -> Result<(), Box<Error>> {
-/// let parsed = parse_crockford_u64("x1iIlLoO0");
-///
-/// let mut string_representation = String::new();
-/// append_crockford_u64(parsed?, 9, &mut string_representation);
-///
-/// assert_eq!(string_representation, "X11111000");
-/// #
-/// #     Ok(())
-/// # }
-/// #
-/// # fn main() {
-/// #     try_main().unwrap();
-/// # }
-/// ```
-///
-/// # Errors
-/// Parsing a string longer than 13 characters would cause an `u64` overflow.
-/// Trying to do so results in `InvalidLength`.
-///
-/// ```
-/// # use rusty_ulid::crockford::*;
-/// let nope = parse_crockford_u64("12345678901234");
-///
-/// assert_eq!(Err(DecodingError::InvalidLength), nope);
-/// ```
-///
-/// Parsing a 13 character works if the `u64` does not overflow.
-/// Overflowing the `u64` results in `DataTypeOverflow`.
-///
-/// ```
-/// # use rusty_ulid::crockford::*;
-/// let yeah = parse_crockford_u64("FZZZZZZZZZZZZ");
-///
-/// assert_eq!(Ok(0xFFFF_FFFF_FFFF_FFFF), yeah);
-///
-/// let nope = parse_crockford_u64("G000000000000");
-///
-/// assert_eq!(Err(DecodingError::DataTypeOverflow), nope);
-/// ```
-//
-/// Parsing a string containing an invalid character results in `InvalidChar`.
-///
-/// ```
-/// # use rusty_ulid::crockford::*;
-/// let nope = parse_crockford_u64("U");
-///
-/// assert_eq!(Err(DecodingError::InvalidChar('U')), nope);
-/// ```
-pub fn parse_crockford_u64(input: &str) -> Result<u64, DecodingError> {
-    let length = input.len() as u64;
-    if length > 13 {
-        // more than 13 characters would exceed u64
-        return Err(DecodingError::InvalidLength);
-    }
-
-    let mut result: u64 = 0;
-
-    for (i, current_char) in input.chars().enumerate() {
-        let value = resolve_u64_value_for_char(current_char)?;
-        if i == 0 {
-            if length == 13 && value > 15 {
-                return Err(DecodingError::DataTypeOverflow);
-            }
-            result = value;
-        } else {
-            result = (result << MASK_BITS) | value;
-        };
-    }
-
-    Ok(result)
-}
-
-/// Appends `count` number of [crockford Base32][crockford] digits to `to_append_to`.
-///
-/// [crockford]: https://crockford.com/wrmg/base32.html
-///
-/// Only `count` values up to 26 make sense since that will exhaust all the bits
-/// of the given `value`. Higher `count` values will simply prepend additional `0`s.
-///
-/// # Examples
 ///
 /// ```
 /// # use rusty_ulid::crockford::*;
 /// let mut a_string = String::new();
-/// append_crockford_u128(1, 1, &mut a_string);
-/// assert_eq!(a_string, "1");
+/// append_crockford_u128(1, &mut a_string);
+/// assert_eq!(a_string, "00000000000000000000000001");
 /// ```
 ///
 /// ```
 /// # use rusty_ulid::crockford::*;
 /// let mut a_string = String::new();
-/// append_crockford_u128(0xFF, 4, &mut a_string);
-/// assert_eq!(a_string, "007Z");
+/// append_crockford_u128(0xFF, &mut a_string);
+/// assert_eq!(a_string, "0000000000000000000000007Z");
 /// ```
 ///
 /// ```
 /// # use rusty_ulid::crockford::*;
 /// let mut a_string = String::new();
-/// append_crockford_u128(0xFFFF_FFFF_FFFF_FFFF, 13, &mut a_string);
-/// assert_eq!(a_string, "FZZZZZZZZZZZZ");
+/// append_crockford_u128(0xFFFF_FFFF_FFFF_FFFF, &mut a_string);
+/// assert_eq!(a_string, "0000000000000FZZZZZZZZZZZZ");
 /// ```
 ///
 /// ```
 /// # use rusty_ulid::crockford::*;
 /// let mut a_string = String::new();
-/// append_crockford_u128(0xFFFF_FFFF_FFFF_FFFF, 14, &mut a_string);
-/// assert_eq!(a_string, "0FZZZZZZZZZZZZ");
-/// ```
-///
-/// ```
-/// # use rusty_ulid::crockford::*;
-/// let mut a_string = String::new();
-/// append_crockford_u128(0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF, 26, &mut a_string);
+/// append_crockford_u128(0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF, &mut a_string);
 /// assert_eq!(a_string, "7ZZZZZZZZZZZZZZZZZZZZZZZZZ");
 /// ```
-///
-/// ```
-/// # use rusty_ulid::crockford::*;
-/// let mut a_string = String::new();
-/// append_crockford_u128(0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF, 27, &mut a_string);
-/// assert_eq!(a_string, "07ZZZZZZZZZZZZZZZZZZZZZZZZZ");
-/// ```
-pub fn append_crockford_u128(value: u128, count: u8, to_append_to: &mut String) {
-    let count = usize::from(count);
-
-    for i in 0..count {
-        let shift_bits = (count - i - 1) * MASK_BITS;
-
-        let index = if shift_bits < 128 {
-            ((value >> shift_bits) & MASK_U128) as usize
-        } else {
-            0
-        };
-
-        to_append_to.push(ENCODING_DIGITS[index]);
-    }
+pub fn append_crockford_u128(value: u128, to_append_to: &mut String) {
+    to_append_to.push(ENCODING_DIGITS[(value >> 125) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 120) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 115) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 110) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 105) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 100) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 95) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 90) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 85) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 80) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 75) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 70) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 65) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 60) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 55) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 50) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 45) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 40) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 35) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 30) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 25) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 20) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 15) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 10) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[((value >> 5) & MASK_U128) as usize]);
+    to_append_to.push(ENCODING_DIGITS[(value & MASK_U128) as usize]);
 }
 
 /// Parses the given [crockford Base32][crockford] string into a `u128`.
@@ -365,7 +216,7 @@ pub fn append_crockford_u128(value: u128, count: u8, to_append_to: &mut String) 
 /// # Examples
 /// ```
 /// # use rusty_ulid::crockford::*;
-/// let parsed = parse_crockford_u128("7Z");
+/// let parsed = parse_crockford_u128("0000000000000000000000007Z");
 ///
 /// assert_eq!(Ok(0xFF), parsed);
 /// ```
@@ -378,12 +229,12 @@ pub fn append_crockford_u128(value: u128, count: u8, to_append_to: &mut String) 
 /// # use rusty_ulid::crockford::*;
 /// #
 /// # fn try_main() -> Result<(), Box<Error>> {
-/// let parsed = parse_crockford_u128("x1iIlLoO0");
+/// let parsed = parse_crockford_u128("00000000000000000x1iIlLoO0");
 ///
 /// let mut string_representation = String::new();
-/// append_crockford_u128(parsed?, 9, &mut string_representation);
+/// append_crockford_u128(parsed?, &mut string_representation);
 ///
-/// assert_eq!(string_representation, "X11111000");
+/// assert_eq!(string_representation, "00000000000000000X11111000");
 /// #
 /// #     Ok(())
 /// # }
@@ -394,8 +245,14 @@ pub fn append_crockford_u128(value: u128, count: u8, to_append_to: &mut String) 
 /// ```
 ///
 /// # Errors
-/// Parsing a string longer than 26 characters would cause an `u128` overflow.
-/// Trying to do so results in `InvalidLength`.
+/// Parsing a string with other than 26 bytes results in `InvalidLength`.
+///
+/// ```
+/// # use rusty_ulid::crockford::*;
+/// let nope = parse_crockford_u128("1234567890123456789012345");
+///
+/// assert_eq!(Err(DecodingError::InvalidLength), nope);
+/// ```
 ///
 /// ```
 /// # use rusty_ulid::crockford::*;
@@ -404,8 +261,7 @@ pub fn append_crockford_u128(value: u128, count: u8, to_append_to: &mut String) 
 /// assert_eq!(Err(DecodingError::InvalidLength), nope);
 /// ```
 ///
-/// Parsing a 26 character works if the `u128` does not overflow.
-/// Overflowing the `u128` results in `DataTypeOverflow`.
+/// Parsing 26 bytes results in `DataTypeOverflow` if the `u128` would overflow.
 ///
 /// ```
 /// # use rusty_ulid::crockford::*;
@@ -418,34 +274,54 @@ pub fn append_crockford_u128(value: u128, count: u8, to_append_to: &mut String) 
 /// assert_eq!(Err(DecodingError::DataTypeOverflow), nope);
 /// ```
 //
-/// Parsing a string containing an invalid character results in `InvalidChar`.
+/// Parsing a string containing an invalid character results in `InvalidChar` containing
+/// the character.
 ///
 /// ```
 /// # use rusty_ulid::crockford::*;
-/// let nope = parse_crockford_u128("U");
+/// let nope = parse_crockford_u128("0000000000000000000000000U");
 ///
 /// assert_eq!(Err(DecodingError::InvalidChar('U')), nope);
 /// ```
 pub fn parse_crockford_u128(input: &str) -> Result<u128, DecodingError> {
     let length = input.len();
-    if length > 26 {
-        // more than 26 characters would exceed u128
+    if length != 26 {
         return Err(DecodingError::InvalidLength);
     }
 
-    let mut result: u128 = 0;
+    let mut chars = input.chars();
 
-    for (i, current_char) in input.chars().enumerate() {
-        let value = resolve_u128_value_for_char(current_char)?;
-        if i == 0 {
-            if length == 26 && value > 7 {
-                return Err(DecodingError::DataTypeOverflow);
-            }
-            result = value;
-        } else {
-            result = (result << MASK_BITS) | value;
-        };
+    let highest = resolve_u128_value_for_char(chars.next().unwrap())?;
+    if highest > 7 {
+        return Err(DecodingError::DataTypeOverflow);
     }
+
+    let mut result: u128 = highest << 125;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 120;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 115;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 110;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 105;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 100;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 95;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 90;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 85;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 80;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 75;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 70;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 65;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 60;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 55;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 50;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 45;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 40;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 35;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 30;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 25;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 20;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 15;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 10;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())? << 5;
+    result |= resolve_u128_value_for_char(chars.next().unwrap())?;
 
     Ok(result)
 }
@@ -596,13 +472,12 @@ pub fn parse_crockford_u64_tuple(input: &str) -> Result<(u64, u64), DecodingErro
     }
 
     let mut chars = input.chars();
-    let mut high: u64 = 0;
-    let mut low: u64 = 0;
     let highest = resolve_u64_value_for_char(chars.next().unwrap())?;
     if highest > 7 {
         return Err(DecodingError::DataTypeOverflow);
     }
-    high |= highest << 61;
+
+    let mut high: u64 = highest << 61;
     high |= resolve_u64_value_for_char(chars.next().unwrap())? << 56;
     high |= resolve_u64_value_for_char(chars.next().unwrap())? << 51;
     high |= resolve_u64_value_for_char(chars.next().unwrap())? << 46;
@@ -618,7 +493,8 @@ pub fn parse_crockford_u64_tuple(input: &str) -> Result<(u64, u64), DecodingErro
 
     let split = resolve_u64_value_for_char(chars.next().unwrap())?;
     high |= split >> 4;
-    low |= split << 60;
+
+    let mut low: u64 = split << 60;
 
     low |= resolve_u64_value_for_char(chars.next().unwrap())? << 55;
     low |= resolve_u64_value_for_char(chars.next().unwrap())? << 50;
@@ -640,300 +516,136 @@ pub fn parse_crockford_u64_tuple(input: &str) -> Result<(u64, u64), DecodingErro
 mod tests {
     use super::*;
 
-    const PAST_TIMESTAMP: u64 = 1481195424879;
-    const PAST_TIMESTAMP_PART: &str = "01B3F2133F";
-
-    const MAX_TIMESTAMP: u64 = 0xFFFF_FFFF_FFFF;
-    const MAX_TIMESTAMP_PART: &str = "7ZZZZZZZZZ";
-
-    #[test]
-    fn append_crockford_u64_test_cases() {
-        single_append_crockford_u64(0, 1, "0");
-        single_append_crockford_u64(1, 1, "1");
-        single_append_crockford_u64(2, 1, "2");
-        single_append_crockford_u64(3, 1, "3");
-        single_append_crockford_u64(4, 1, "4");
-        single_append_crockford_u64(5, 1, "5");
-        single_append_crockford_u64(6, 1, "6");
-        single_append_crockford_u64(7, 1, "7");
-        single_append_crockford_u64(8, 1, "8");
-        single_append_crockford_u64(9, 1, "9");
-        single_append_crockford_u64(10, 1, "A");
-        single_append_crockford_u64(11, 1, "B");
-        single_append_crockford_u64(12, 1, "C");
-        single_append_crockford_u64(13, 1, "D");
-        single_append_crockford_u64(14, 1, "E");
-        single_append_crockford_u64(15, 1, "F");
-        single_append_crockford_u64(16, 1, "G");
-        single_append_crockford_u64(17, 1, "H");
-        single_append_crockford_u64(18, 1, "J");
-        single_append_crockford_u64(19, 1, "K");
-        single_append_crockford_u64(20, 1, "M");
-        single_append_crockford_u64(21, 1, "N");
-        single_append_crockford_u64(22, 1, "P");
-        single_append_crockford_u64(23, 1, "Q");
-        single_append_crockford_u64(24, 1, "R");
-        single_append_crockford_u64(25, 1, "S");
-        single_append_crockford_u64(26, 1, "T");
-        single_append_crockford_u64(27, 1, "V");
-        single_append_crockford_u64(28, 1, "W");
-        single_append_crockford_u64(29, 1, "X");
-        single_append_crockford_u64(30, 1, "Y");
-        single_append_crockford_u64(31, 1, "Z");
-        single_append_crockford_u64(32, 1, "0");
-        single_append_crockford_u64(32, 2, "10");
-        single_append_crockford_u64(0, 0, "");
-        single_append_crockford_u64(0, 13, "0000000000000");
-        single_append_crockford_u64(194, 2, "62");
-        single_append_crockford_u64(45_678, 4, "1CKE");
-        single_append_crockford_u64(393_619, 4, "C0CK");
-        single_append_crockford_u64(398_373, 4, "C515");
-        single_append_crockford_u64(421_562, 4, "CVNT");
-        single_append_crockford_u64(456_789, 4, "DY2N");
-        single_append_crockford_u64(519_571, 4, "FVCK");
-        single_append_crockford_u64(3_838_385_658_376_483, 11, "3D2ZQ6TVC93");
-        single_append_crockford_u64(0x1F, 1, "Z");
-        single_append_crockford_u64(0x1F << 5, 1, "0");
-        single_append_crockford_u64(0x1F << 5, 2, "Z0");
-        single_append_crockford_u64(0x1F << 10, 1, "0");
-        single_append_crockford_u64(0x1F << 10, 2, "00");
-        single_append_crockford_u64(0x1F << 10, 3, "Z00");
-        single_append_crockford_u64(0x1F << 15, 3, "000");
-        single_append_crockford_u64(0x1F << 15, 4, "Z000");
-        single_append_crockford_u64(0x1F << 55, 13, "0Z00000000000");
-        single_append_crockford_u64(0x1F << 60, 13, "F000000000000");
-        single_append_crockford_u64(0xFFFF_FFFF_FFFF_FFFF, 13, "FZZZZZZZZZZZZ");
-        single_append_crockford_u64(PAST_TIMESTAMP, 10, PAST_TIMESTAMP_PART);
-        single_append_crockford_u64(MAX_TIMESTAMP, 10, MAX_TIMESTAMP_PART);
-        single_append_crockford_u64(0xFFFF_FFFF_FFFF_FFFF, 0xFF, "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000FZZZZZZZZZZZZ");
-    }
-
-    #[test]
-    fn parse_crockford_u64_test_cases() {
-        single_parse_crockford_u64("0", Ok(0));
-        single_parse_crockford_u64("1", Ok(1));
-        single_parse_crockford_u64("2", Ok(2));
-        single_parse_crockford_u64("3", Ok(3));
-        single_parse_crockford_u64("4", Ok(4));
-        single_parse_crockford_u64("5", Ok(5));
-        single_parse_crockford_u64("6", Ok(6));
-        single_parse_crockford_u64("7", Ok(7));
-        single_parse_crockford_u64("8", Ok(8));
-        single_parse_crockford_u64("9", Ok(9));
-
-        single_parse_crockford_u64("A", Ok(10));
-        single_parse_crockford_u64("B", Ok(11));
-        single_parse_crockford_u64("C", Ok(12));
-        single_parse_crockford_u64("D", Ok(13));
-        single_parse_crockford_u64("E", Ok(14));
-        single_parse_crockford_u64("F", Ok(15));
-        single_parse_crockford_u64("G", Ok(16));
-        single_parse_crockford_u64("H", Ok(17));
-        single_parse_crockford_u64("J", Ok(18));
-        single_parse_crockford_u64("K", Ok(19));
-        single_parse_crockford_u64("M", Ok(20));
-        single_parse_crockford_u64("N", Ok(21));
-        single_parse_crockford_u64("P", Ok(22));
-        single_parse_crockford_u64("Q", Ok(23));
-        single_parse_crockford_u64("R", Ok(24));
-        single_parse_crockford_u64("S", Ok(25));
-        single_parse_crockford_u64("T", Ok(26));
-        single_parse_crockford_u64("V", Ok(27));
-        single_parse_crockford_u64("W", Ok(28));
-        single_parse_crockford_u64("X", Ok(29));
-        single_parse_crockford_u64("Y", Ok(30));
-        single_parse_crockford_u64("Z", Ok(31));
-
-        single_parse_crockford_u64("a", Ok(10));
-        single_parse_crockford_u64("b", Ok(11));
-        single_parse_crockford_u64("c", Ok(12));
-        single_parse_crockford_u64("d", Ok(13));
-        single_parse_crockford_u64("e", Ok(14));
-        single_parse_crockford_u64("f", Ok(15));
-        single_parse_crockford_u64("g", Ok(16));
-        single_parse_crockford_u64("h", Ok(17));
-        single_parse_crockford_u64("j", Ok(18));
-        single_parse_crockford_u64("k", Ok(19));
-        single_parse_crockford_u64("m", Ok(20));
-        single_parse_crockford_u64("n", Ok(21));
-        single_parse_crockford_u64("p", Ok(22));
-        single_parse_crockford_u64("q", Ok(23));
-        single_parse_crockford_u64("r", Ok(24));
-        single_parse_crockford_u64("s", Ok(25));
-        single_parse_crockford_u64("t", Ok(26));
-        single_parse_crockford_u64("v", Ok(27));
-        single_parse_crockford_u64("w", Ok(28));
-        single_parse_crockford_u64("x", Ok(29));
-        single_parse_crockford_u64("y", Ok(30));
-        single_parse_crockford_u64("z", Ok(31));
-
-        single_parse_crockford_u64("10", Ok(32));
-
-        // special characters
-        single_parse_crockford_u64("o", Ok(0));
-        single_parse_crockford_u64("O", Ok(0));
-        single_parse_crockford_u64("i", Ok(1));
-        single_parse_crockford_u64("I", Ok(1));
-        single_parse_crockford_u64("l", Ok(1));
-        single_parse_crockford_u64("L", Ok(1));
-
-        single_parse_crockford_u64(PAST_TIMESTAMP_PART, Ok(PAST_TIMESTAMP));
-        single_parse_crockford_u64(MAX_TIMESTAMP_PART, Ok(MAX_TIMESTAMP));
-
-        single_parse_crockford_u64("ZZZZZZZZZZZZ", Ok(0xFFF_FFFF_FFFF_FFFF));
-        single_parse_crockford_u64("FZZZZZZZZZZZZ", Ok(0xFFFF_FFFF_FFFF_FFFF));
-        single_parse_crockford_u64("G000000000000", Err(DecodingError::DataTypeOverflow));
-
-        single_parse_crockford_u64("U", Err(DecodingError::InvalidChar('U')));
-
-        single_parse_crockford_u64("12345678901234", Err(DecodingError::InvalidLength));
-    }
-
     #[test]
     fn append_crockford_u128_test_cases() {
-        single_append_crockford_u128(0, 1, "0");
-        single_append_crockford_u128(1, 1, "1");
-        single_append_crockford_u128(2, 1, "2");
-        single_append_crockford_u128(3, 1, "3");
-        single_append_crockford_u128(4, 1, "4");
-        single_append_crockford_u128(5, 1, "5");
-        single_append_crockford_u128(6, 1, "6");
-        single_append_crockford_u128(7, 1, "7");
-        single_append_crockford_u128(8, 1, "8");
-        single_append_crockford_u128(9, 1, "9");
-        single_append_crockford_u128(10, 1, "A");
-        single_append_crockford_u128(11, 1, "B");
-        single_append_crockford_u128(12, 1, "C");
-        single_append_crockford_u128(13, 1, "D");
-        single_append_crockford_u128(14, 1, "E");
-        single_append_crockford_u128(15, 1, "F");
-        single_append_crockford_u128(16, 1, "G");
-        single_append_crockford_u128(17, 1, "H");
-        single_append_crockford_u128(18, 1, "J");
-        single_append_crockford_u128(19, 1, "K");
-        single_append_crockford_u128(20, 1, "M");
-        single_append_crockford_u128(21, 1, "N");
-        single_append_crockford_u128(22, 1, "P");
-        single_append_crockford_u128(23, 1, "Q");
-        single_append_crockford_u128(24, 1, "R");
-        single_append_crockford_u128(25, 1, "S");
-        single_append_crockford_u128(26, 1, "T");
-        single_append_crockford_u128(27, 1, "V");
-        single_append_crockford_u128(28, 1, "W");
-        single_append_crockford_u128(29, 1, "X");
-        single_append_crockford_u128(30, 1, "Y");
-        single_append_crockford_u128(31, 1, "Z");
-        single_append_crockford_u128(32, 1, "0");
-        single_append_crockford_u128(32, 2, "10");
-        single_append_crockford_u128(0, 0, "");
-        single_append_crockford_u128(0, 13, "0000000000000");
-        single_append_crockford_u128(194, 2, "62");
-        single_append_crockford_u128(45_678, 4, "1CKE");
-        single_append_crockford_u128(393_619, 4, "C0CK");
-        single_append_crockford_u128(398_373, 4, "C515");
-        single_append_crockford_u128(421_562, 4, "CVNT");
-        single_append_crockford_u128(456_789, 4, "DY2N");
-        single_append_crockford_u128(519_571, 4, "FVCK");
-        single_append_crockford_u128(3_838_385_658_376_483, 11, "3D2ZQ6TVC93");
-        single_append_crockford_u128(0x1F, 1, "Z");
-        single_append_crockford_u128(0x1F << 5, 1, "0");
-        single_append_crockford_u128(0x1F << 5, 2, "Z0");
-        single_append_crockford_u128(0x1F << 10, 1, "0");
-        single_append_crockford_u128(0x1F << 10, 2, "00");
-        single_append_crockford_u128(0x1F << 10, 3, "Z00");
-        single_append_crockford_u128(0x1F << 15, 3, "000");
-        single_append_crockford_u128(0x1F << 15, 4, "Z000");
-        single_append_crockford_u128(0x1F << 55, 13, "0Z00000000000");
-        single_append_crockford_u128(0x1F << 60, 13, "Z000000000000");
-        single_append_crockford_u128(0x1F << 120, 26, "0Z000000000000000000000000");
-        single_append_crockford_u128(0x1F << 125, 26, "70000000000000000000000000");
-        single_append_crockford_u128(0xFFFF_FFFF_FFFF_FFFF, 13, "FZZZZZZZZZZZZ");
+        single_append_crockford_u128(0, "00000000000000000000000000");
+        single_append_crockford_u128(1, "00000000000000000000000001");
+        single_append_crockford_u128(2, "00000000000000000000000002");
+        single_append_crockford_u128(3, "00000000000000000000000003");
+        single_append_crockford_u128(4, "00000000000000000000000004");
+        single_append_crockford_u128(5, "00000000000000000000000005");
+        single_append_crockford_u128(6, "00000000000000000000000006");
+        single_append_crockford_u128(7, "00000000000000000000000007");
+        single_append_crockford_u128(8, "00000000000000000000000008");
+        single_append_crockford_u128(9, "00000000000000000000000009");
+        single_append_crockford_u128(10, "0000000000000000000000000A");
+        single_append_crockford_u128(11, "0000000000000000000000000B");
+        single_append_crockford_u128(12, "0000000000000000000000000C");
+        single_append_crockford_u128(13, "0000000000000000000000000D");
+        single_append_crockford_u128(14, "0000000000000000000000000E");
+        single_append_crockford_u128(15, "0000000000000000000000000F");
+        single_append_crockford_u128(16, "0000000000000000000000000G");
+        single_append_crockford_u128(17, "0000000000000000000000000H");
+        single_append_crockford_u128(18, "0000000000000000000000000J");
+        single_append_crockford_u128(19, "0000000000000000000000000K");
+        single_append_crockford_u128(20, "0000000000000000000000000M");
+        single_append_crockford_u128(21, "0000000000000000000000000N");
+        single_append_crockford_u128(22, "0000000000000000000000000P");
+        single_append_crockford_u128(23, "0000000000000000000000000Q");
+        single_append_crockford_u128(24, "0000000000000000000000000R");
+        single_append_crockford_u128(25, "0000000000000000000000000S");
+        single_append_crockford_u128(26, "0000000000000000000000000T");
+        single_append_crockford_u128(27, "0000000000000000000000000V");
+        single_append_crockford_u128(28, "0000000000000000000000000W");
+        single_append_crockford_u128(29, "0000000000000000000000000X");
+        single_append_crockford_u128(30, "0000000000000000000000000Y");
+        single_append_crockford_u128(31, "0000000000000000000000000Z");
+        single_append_crockford_u128(32, "00000000000000000000000010");
+        single_append_crockford_u128(194, "00000000000000000000000062");
+        single_append_crockford_u128(45_678, "00000000000000000000001CKE");
+        single_append_crockford_u128(393_619, "0000000000000000000000C0CK");
+        single_append_crockford_u128(398_373, "0000000000000000000000C515");
+        single_append_crockford_u128(421_562, "0000000000000000000000CVNT");
+        single_append_crockford_u128(456_789, "0000000000000000000000DY2N");
+        single_append_crockford_u128(519_571, "0000000000000000000000FVCK");
+        single_append_crockford_u128(3_838_385_658_376_483, "0000000000000003D2ZQ6TVC93");
+        single_append_crockford_u128(0x1F, "0000000000000000000000000Z");
+        single_append_crockford_u128(0x1F << 5, "000000000000000000000000Z0");
+        single_append_crockford_u128(0x1F << 10, "00000000000000000000000Z00");
+        single_append_crockford_u128(0x1F << 15, "0000000000000000000000Z000");
+        single_append_crockford_u128(0x1F << 55, "00000000000000Z00000000000");
+        single_append_crockford_u128(0x1F << 60, "0000000000000Z000000000000");
+        single_append_crockford_u128(0x1F << 120, "0Z000000000000000000000000");
+        single_append_crockford_u128(0x1F << 125, "70000000000000000000000000");
+        single_append_crockford_u128(0xFFFF_FFFF_FFFF_FFFF, "0000000000000FZZZZZZZZZZZZ");
         single_append_crockford_u128(
             0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF,
-            26,
             "7ZZZZZZZZZZZZZZZZZZZZZZZZZ",
         );
-        single_append_crockford_u128(PAST_TIMESTAMP.into(), 10, PAST_TIMESTAMP_PART);
-        single_append_crockford_u128(MAX_TIMESTAMP.into(), 10, MAX_TIMESTAMP_PART);
-        single_append_crockford_u128(0xFFFF_FFFF_FFFF_FFFF, 0xFF, "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000FZZZZZZZZZZZZ");
-        single_append_crockford_u128(0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF, 0xFF, "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007ZZZZZZZZZZZZZZZZZZZZZZZZZ");
     }
 
     #[test]
     fn parse_crockford_u128_test_cases() {
-        single_parse_crockford_u128("0", Ok(0));
-        single_parse_crockford_u128("1", Ok(1));
-        single_parse_crockford_u128("2", Ok(2));
-        single_parse_crockford_u128("3", Ok(3));
-        single_parse_crockford_u128("4", Ok(4));
-        single_parse_crockford_u128("5", Ok(5));
-        single_parse_crockford_u128("6", Ok(6));
-        single_parse_crockford_u128("7", Ok(7));
-        single_parse_crockford_u128("8", Ok(8));
-        single_parse_crockford_u128("9", Ok(9));
+        single_parse_crockford_u128("00000000000000000000000000", Ok(0));
+        single_parse_crockford_u128("00000000000000000000000001", Ok(1));
+        single_parse_crockford_u128("00000000000000000000000002", Ok(2));
+        single_parse_crockford_u128("00000000000000000000000003", Ok(3));
+        single_parse_crockford_u128("00000000000000000000000004", Ok(4));
+        single_parse_crockford_u128("00000000000000000000000005", Ok(5));
+        single_parse_crockford_u128("00000000000000000000000006", Ok(6));
+        single_parse_crockford_u128("00000000000000000000000007", Ok(7));
+        single_parse_crockford_u128("00000000000000000000000008", Ok(8));
+        single_parse_crockford_u128("00000000000000000000000009", Ok(9));
 
-        single_parse_crockford_u128("A", Ok(10));
-        single_parse_crockford_u128("B", Ok(11));
-        single_parse_crockford_u128("C", Ok(12));
-        single_parse_crockford_u128("D", Ok(13));
-        single_parse_crockford_u128("E", Ok(14));
-        single_parse_crockford_u128("F", Ok(15));
-        single_parse_crockford_u128("G", Ok(16));
-        single_parse_crockford_u128("H", Ok(17));
-        single_parse_crockford_u128("J", Ok(18));
-        single_parse_crockford_u128("K", Ok(19));
-        single_parse_crockford_u128("M", Ok(20));
-        single_parse_crockford_u128("N", Ok(21));
-        single_parse_crockford_u128("P", Ok(22));
-        single_parse_crockford_u128("Q", Ok(23));
-        single_parse_crockford_u128("R", Ok(24));
-        single_parse_crockford_u128("S", Ok(25));
-        single_parse_crockford_u128("T", Ok(26));
-        single_parse_crockford_u128("V", Ok(27));
-        single_parse_crockford_u128("W", Ok(28));
-        single_parse_crockford_u128("X", Ok(29));
-        single_parse_crockford_u128("Y", Ok(30));
-        single_parse_crockford_u128("Z", Ok(31));
+        single_parse_crockford_u128("0000000000000000000000000A", Ok(10));
+        single_parse_crockford_u128("0000000000000000000000000B", Ok(11));
+        single_parse_crockford_u128("0000000000000000000000000C", Ok(12));
+        single_parse_crockford_u128("0000000000000000000000000D", Ok(13));
+        single_parse_crockford_u128("0000000000000000000000000E", Ok(14));
+        single_parse_crockford_u128("0000000000000000000000000F", Ok(15));
+        single_parse_crockford_u128("0000000000000000000000000G", Ok(16));
+        single_parse_crockford_u128("0000000000000000000000000H", Ok(17));
+        single_parse_crockford_u128("0000000000000000000000000J", Ok(18));
+        single_parse_crockford_u128("0000000000000000000000000K", Ok(19));
+        single_parse_crockford_u128("0000000000000000000000000M", Ok(20));
+        single_parse_crockford_u128("0000000000000000000000000N", Ok(21));
+        single_parse_crockford_u128("0000000000000000000000000P", Ok(22));
+        single_parse_crockford_u128("0000000000000000000000000Q", Ok(23));
+        single_parse_crockford_u128("0000000000000000000000000R", Ok(24));
+        single_parse_crockford_u128("0000000000000000000000000S", Ok(25));
+        single_parse_crockford_u128("0000000000000000000000000T", Ok(26));
+        single_parse_crockford_u128("0000000000000000000000000V", Ok(27));
+        single_parse_crockford_u128("0000000000000000000000000W", Ok(28));
+        single_parse_crockford_u128("0000000000000000000000000X", Ok(29));
+        single_parse_crockford_u128("0000000000000000000000000Y", Ok(30));
+        single_parse_crockford_u128("0000000000000000000000000Z", Ok(31));
 
-        single_parse_crockford_u128("a", Ok(10));
-        single_parse_crockford_u128("b", Ok(11));
-        single_parse_crockford_u128("c", Ok(12));
-        single_parse_crockford_u128("d", Ok(13));
-        single_parse_crockford_u128("e", Ok(14));
-        single_parse_crockford_u128("f", Ok(15));
-        single_parse_crockford_u128("g", Ok(16));
-        single_parse_crockford_u128("h", Ok(17));
-        single_parse_crockford_u128("j", Ok(18));
-        single_parse_crockford_u128("k", Ok(19));
-        single_parse_crockford_u128("m", Ok(20));
-        single_parse_crockford_u128("n", Ok(21));
-        single_parse_crockford_u128("p", Ok(22));
-        single_parse_crockford_u128("q", Ok(23));
-        single_parse_crockford_u128("r", Ok(24));
-        single_parse_crockford_u128("s", Ok(25));
-        single_parse_crockford_u128("t", Ok(26));
-        single_parse_crockford_u128("v", Ok(27));
-        single_parse_crockford_u128("w", Ok(28));
-        single_parse_crockford_u128("x", Ok(29));
-        single_parse_crockford_u128("y", Ok(30));
-        single_parse_crockford_u128("z", Ok(31));
+        single_parse_crockford_u128("0000000000000000000000000a", Ok(10));
+        single_parse_crockford_u128("0000000000000000000000000b", Ok(11));
+        single_parse_crockford_u128("0000000000000000000000000c", Ok(12));
+        single_parse_crockford_u128("0000000000000000000000000d", Ok(13));
+        single_parse_crockford_u128("0000000000000000000000000e", Ok(14));
+        single_parse_crockford_u128("0000000000000000000000000f", Ok(15));
+        single_parse_crockford_u128("0000000000000000000000000g", Ok(16));
+        single_parse_crockford_u128("0000000000000000000000000h", Ok(17));
+        single_parse_crockford_u128("0000000000000000000000000j", Ok(18));
+        single_parse_crockford_u128("0000000000000000000000000k", Ok(19));
+        single_parse_crockford_u128("0000000000000000000000000m", Ok(20));
+        single_parse_crockford_u128("0000000000000000000000000n", Ok(21));
+        single_parse_crockford_u128("0000000000000000000000000p", Ok(22));
+        single_parse_crockford_u128("0000000000000000000000000q", Ok(23));
+        single_parse_crockford_u128("0000000000000000000000000r", Ok(24));
+        single_parse_crockford_u128("0000000000000000000000000s", Ok(25));
+        single_parse_crockford_u128("0000000000000000000000000t", Ok(26));
+        single_parse_crockford_u128("0000000000000000000000000v", Ok(27));
+        single_parse_crockford_u128("0000000000000000000000000w", Ok(28));
+        single_parse_crockford_u128("0000000000000000000000000x", Ok(29));
+        single_parse_crockford_u128("0000000000000000000000000y", Ok(30));
+        single_parse_crockford_u128("0000000000000000000000000z", Ok(31));
 
-        single_parse_crockford_u128("10", Ok(32));
+        single_parse_crockford_u128("00000000000000000000000010", Ok(32));
 
         // special characters
-        single_parse_crockford_u128("o", Ok(0));
-        single_parse_crockford_u128("O", Ok(0));
-        single_parse_crockford_u128("i", Ok(1));
-        single_parse_crockford_u128("I", Ok(1));
-        single_parse_crockford_u128("l", Ok(1));
-        single_parse_crockford_u128("L", Ok(1));
+        single_parse_crockford_u128("0000000000000000000000000o", Ok(0));
+        single_parse_crockford_u128("0000000000000000000000000O", Ok(0));
+        single_parse_crockford_u128("0000000000000000000000000i", Ok(1));
+        single_parse_crockford_u128("0000000000000000000000000I", Ok(1));
+        single_parse_crockford_u128("0000000000000000000000000l", Ok(1));
+        single_parse_crockford_u128("0000000000000000000000000L", Ok(1));
 
-        single_parse_crockford_u128(PAST_TIMESTAMP_PART, Ok(PAST_TIMESTAMP.into()));
-        single_parse_crockford_u128(MAX_TIMESTAMP_PART, Ok(MAX_TIMESTAMP.into()));
-
-        single_parse_crockford_u128("ZZZZZZZZZZZZ", Ok(0xFFF_FFFF_FFFF_FFFF));
-        single_parse_crockford_u128("FZZZZZZZZZZZZ", Ok(0xFFFF_FFFF_FFFF_FFFF));
-        single_parse_crockford_u128("G000000000000", Ok(0x1_0000_0000_0000_0000));
+        single_parse_crockford_u128("00000000000000ZZZZZZZZZZZZ", Ok(0xFFF_FFFF_FFFF_FFFF));
+        single_parse_crockford_u128("0000000000000FZZZZZZZZZZZZ", Ok(0xFFFF_FFFF_FFFF_FFFF));
+        single_parse_crockford_u128("0000000000000G000000000000", Ok(0x1_0000_0000_0000_0000));
         single_parse_crockford_u128(
             "7ZZZZZZZZZZZZZZZZZZZZZZZZZ",
             Ok(0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF),
@@ -943,7 +655,10 @@ mod tests {
             Err(DecodingError::DataTypeOverflow),
         );
 
-        single_parse_crockford_u128("U", Err(DecodingError::InvalidChar('U')));
+        single_parse_crockford_u128(
+            "0000000000000000000000000U",
+            Err(DecodingError::InvalidChar('U')),
+        );
 
         single_parse_crockford_u128(
             "123456789012345678901234567",
@@ -1099,22 +814,9 @@ mod tests {
         assert!(DecodingError::DataTypeOverflow.cause().is_none());
     }
 
-    fn single_append_crockford_u64(value: u64, count: u8, expected_result: &str) {
+    fn single_append_crockford_u128(value: u128, expected_result: &str) {
         let mut a_string = String::new();
-        append_crockford_u64(value, count, &mut a_string);
-        println!("{}", a_string);
-        assert_eq!(expected_result, a_string);
-    }
-
-    fn single_parse_crockford_u64(value: &str, expected_result: Result<u64, DecodingError>) {
-        let result = parse_crockford_u64(value);
-        println!("parse_crockford_u64({}) => {:?}", value, result);
-        assert_eq!(result, expected_result);
-    }
-
-    fn single_append_crockford_u128(value: u128, count: u8, expected_result: &str) {
-        let mut a_string = String::new();
-        append_crockford_u128(value, count, &mut a_string);
+        append_crockford_u128(value, &mut a_string);
         println!("{}", a_string);
         assert_eq!(expected_result, a_string);
     }
