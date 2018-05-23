@@ -835,15 +835,22 @@ mod tests {
         Ok(())
     }
 
-    /*
-    StepRng requires rand 0.5
     #[test]
-    fn test_from_rng() {
-        let mut mock_rng = StepRng::new(2, 1);
-        let ulid = Ulid::from_timestamp_with_rng(0, mock_rng);
-        let ulid2 = Ulid::from_timestamp_with_rng(0, mock_rng);
+    fn test_from_timestamp_with_rng() {
+        use rand::rngs::mock::StepRng;
 
-        assert_eq!(ulid, ulid2);
+        let mut mock_rng = StepRng::new(0, 0);
+        let ulid = Ulid::from_timestamp_with_rng(0xFFFF_FFFF_FFFF, &mut mock_rng);
+
+        let ulid_value: u128 = ulid.into();
+
+        assert_eq!(ulid_value, 0xFFFF_FFFF_FFFF_0000_0000_0000_0000_0000);
+
+        let mut mock_rng = StepRng::new(0xF00F, 0);
+        let ulid = Ulid::from_timestamp_with_rng(0, &mut mock_rng);
+
+        let ulid_value: u128 = ulid.into();
+
+        assert_eq!(ulid_value, 0x0000_0000_0000_F00F_0000_0000_0000_F00F);
     }
-    */
 }
