@@ -124,22 +124,18 @@ pub enum DecodingError {
 }
 
 impl Error for DecodingError {
+    // not necessary since Rust 1.27 but left intact for now to stay compatible with 1.26
     fn description(&self) -> &str {
-        let result;
-        match *self {
-            DecodingError::InvalidLength => result = "invalid length",
-            DecodingError::InvalidChar(_) => result = "invalid character",
-            DecodingError::DataTypeOverflow => result = "data type overflow",
-        }
-        result
+        "description() is deprecated; use Display"
     }
 }
 
 impl fmt::Display for DecodingError {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         match *self {
-            DecodingError::InvalidChar(c) => write!(f, "{} '{}'", self.description(), c),
-            _ => write!(f, "{}", self.description()),
+            DecodingError::InvalidLength => write!(f, "invalid length"),
+            DecodingError::InvalidChar(c) => write!(f, "invalid character '{}'", c),
+            DecodingError::DataTypeOverflow => write!(f, "data type overflow"),
         }
     }
 }
@@ -802,16 +798,27 @@ mod tests {
         single_decoding_error_display_trait(DecodingError::DataTypeOverflow, "data type overflow");
     }
 
-    fn single_decoding_error_display_trait(error: DecodingError, expected_result: &str) {
-        let result = format!("{}", error);
-        assert_eq!(result, expected_result)
-    }
-
     #[test]
     fn decoding_error_causes() {
         assert!(DecodingError::InvalidLength.cause().is_none());
         assert!(DecodingError::InvalidChar('a').cause().is_none());
         assert!(DecodingError::DataTypeOverflow.cause().is_none());
+    }
+
+    #[test]
+    fn description_returns_deprecation_message() {
+        assert_eq!(
+            "description() is deprecated; use Display",
+            DecodingError::InvalidLength.description()
+        );
+        assert_eq!(
+            "description() is deprecated; use Display",
+            DecodingError::InvalidChar('a').description()
+        );
+        assert_eq!(
+            "description() is deprecated; use Display",
+            DecodingError::DataTypeOverflow.description()
+        );
     }
 
     fn single_append_crockford_u128(value: u128, expected_result: &str) {
@@ -840,5 +847,10 @@ mod tests {
     ) {
         let result = parse_crockford_u64_tuple(value);
         assert_eq!(result, expected_result);
+    }
+
+    fn single_decoding_error_display_trait(error: DecodingError, expected_result: &str) {
+        let result = format!("{}", error);
+        assert_eq!(result, expected_result)
     }
 }
