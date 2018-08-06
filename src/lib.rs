@@ -59,6 +59,7 @@
 //! - Uses [Crockford's base32][crockford] for better efficiency and readability (5 bits per character)
 //! - Case insensitive
 //! - No special characters (URL safe)
+//! - Monotonic sort order (correctly detects and handles the same millisecond)
 //!
 //! ## Specification
 //!
@@ -106,6 +107,17 @@
 //! This alphabet excludes the letters I, L, O, and U to avoid confusion and abuse.
 //!
 //! `0123456789ABCDEFGHJKMNPQRSTVWXYZ`
+//!
+//! ### Monotonicity
+//!
+//! When generating a ULID within the same millisecond, we can provide some
+//! guarantees regarding sort order. Namely, if the same millisecond is detected,
+//! the `random` component is incremented by 1 bit in the least significant bit position
+//! (with carrying).
+//!
+//! If, in the extremely unlikely event that, you manage to generate more than 2<sup>80</sup>
+//! ULIDs within the same millisecond, or cause the random component to overflow with less,
+//! the generation will fail.
 //!
 //! ### Overflow Errors when Parsing Base32 Strings
 //!
@@ -221,6 +233,59 @@ impl Ulid {
         Ulid::from_timestamp_with_rng(unix_epoch_ms(), &mut rand::thread_rng())
     }
 
+    /// Creates the next monotonic ULID for the given `previous_ulid`.
+    ///
+    /// If the random part of `previous_ulid` would overflow, this function returns a ULID with
+    /// the random part set to zero.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use rusty_ulid::Ulid;
+    /// let previous_ulid = Ulid::from(0);
+    /// let ulid = Ulid::next_monotonic(previous_ulid);
+    ///
+    /// assert_ne!(0, ulid.timestamp());
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// Panics if called after `+10889-08-02T05:31:50.655Z`.
+    pub fn next_monotonic(previous_ulid: Ulid) -> Ulid {
+        Ulid::next_monotonic_from_timestamp_with_rng(
+            previous_ulid,
+            unix_epoch_ms(),
+            &mut rand::thread_rng(),
+        )
+    }
+
+    /// Creates the next strictly monotonic ULID for the given `previous_ulid`.
+    ///
+    /// If the random part of `previous_ulid` would overflow, this function `None`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use rusty_ulid::Ulid;
+    /// let previous_ulid = Ulid::from(0);
+    /// let ulid = Ulid::next_strictly_monotonic(previous_ulid);
+    ///
+    /// if let Some(ulid) = ulid {
+    ///     assert_ne!(0, ulid.timestamp());
+    /// }
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// Panics if called after `+10889-08-02T05:31:50.655Z`.
+    pub fn next_strictly_monotonic(previous_ulid: Ulid) -> Option<Ulid> {
+        Ulid::next_strictly_monotonic_from_timestamp_with_rng(
+            previous_ulid,
+            unix_epoch_ms(),
+            &mut rand::thread_rng(),
+        )
+    }
+
     /// Creates a new ULID with the given `timestamp` obtaining randomness from
     /// `rng`.
     ///
@@ -256,6 +321,136 @@ impl Ulid {
         let value = (high, low);
 
         Ulid { value }
+    }
+
+    /// Creates the next monotonic ULID with the given `previous_ulid`, `timestamp`
+    /// obtaining randomness from `rng`.
+    ///
+    /// If the random part of `previous_ulid` would overflow, this function returns a ULID with
+    /// the random part set to zero.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// extern crate rand;
+    /// # extern crate rusty_ulid;
+    /// # use rusty_ulid::Ulid;
+    /// # fn main() {
+    /// let previous_ulid = Ulid::from(0);
+    /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::thread_rng());
+    ///
+    /// assert_eq!(ulid, Ulid::from(1));
+    /// # }
+    /// ```
+    ///
+    /// ```
+    /// extern crate rand;
+    /// # extern crate rusty_ulid;
+    /// # use rusty_ulid::Ulid;
+    /// # fn main() {
+    /// let previous_ulid = Ulid::from(0xFFFF_FFFF_FFFF_FFFF_FFFE);
+    /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::thread_rng());
+    ///
+    /// assert_eq!(ulid, Ulid::from(0xFFFF_FFFF_FFFF_FFFF_FFFF));
+    /// # }
+    /// ```
+    ///
+    /// ```
+    /// extern crate rand;
+    /// # extern crate rusty_ulid;
+    /// # use rusty_ulid::Ulid;
+    /// # fn main() {
+    /// let previous_ulid = Ulid::from(0xFFFF_FFFF_FFFF_FFFF_FFFF);
+    /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::thread_rng());
+    ///
+    /// // overflow results in zero random part
+    /// assert_eq!(ulid, Ulid::from(0));
+    /// # }
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// Panics if `timestamp` is larger than `0xFFFF_FFFF_FFFF`.
+    // https://users.rust-lang.org/t/i-have-a-strange-documentation-test-issue-related-to-extern-crate/16709
+    pub fn next_monotonic_from_timestamp_with_rng<R>(
+        previous_ulid: Ulid,
+        timestamp: u64,
+        rng: &mut R,
+    ) -> Ulid
+    where
+        R: rand::Rng,
+    {
+        if previous_ulid.timestamp() == timestamp {
+            previous_ulid.increment()
+        } else {
+            Ulid::from_timestamp_with_rng(timestamp, rng)
+        }
+    }
+
+    /// Creates the next strictly monotonic ULID with the given `previous_ulid`, `timestamp`
+    /// obtaining randomness from `rng`.
+    ///
+    /// If the random part of `previous_ulid` would overflow, this function returns `None`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// extern crate rand;
+    /// # extern crate rusty_ulid;
+    /// # use rusty_ulid::Ulid;
+    /// # fn main() {
+    /// let previous_ulid = Ulid::from(0);
+    /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::thread_rng());
+    ///
+    /// assert_eq!(ulid, Some(Ulid::from(1)));
+    /// # }
+    /// ```
+    ///
+    /// ```
+    /// extern crate rand;
+    /// # extern crate rusty_ulid;
+    /// # use rusty_ulid::Ulid;
+    /// # fn main() {
+    /// let previous_ulid = Ulid::from(0xFFFF_FFFF_FFFF_FFFF_FFFE);
+    /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::thread_rng());
+    ///
+    /// assert_eq!(ulid, Some(Ulid::from(0xFFFF_FFFF_FFFF_FFFF_FFFF)));
+    /// # }
+    /// ```
+    ///
+    /// ```
+    /// extern crate rand;
+    /// # extern crate rusty_ulid;
+    /// # use rusty_ulid::Ulid;
+    /// # fn main() {
+    /// let previous_ulid = Ulid::from(0xFFFF_FFFF_FFFF_FFFF_FFFF);
+    /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::thread_rng());
+    ///
+    /// // overflow results in None
+    /// assert_eq!(ulid, None);
+    /// # }
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// Panics if `timestamp` is larger than `0xFFFF_FFFF_FFFF`.
+    // https://users.rust-lang.org/t/i-have-a-strange-documentation-test-issue-related-to-extern-crate/16709
+    pub fn next_strictly_monotonic_from_timestamp_with_rng<R>(
+        previous_ulid: Ulid,
+        timestamp: u64,
+        rng: &mut R,
+    ) -> Option<Ulid>
+    where
+        R: rand::Rng,
+    {
+        let result =
+            Ulid::next_monotonic_from_timestamp_with_rng(previous_ulid.clone(), timestamp, rng);
+
+        if previous_ulid < result {
+            Some(result)
+        } else {
+            None
+        }
     }
 
     /// Returns the timestamp of this ULID as number
@@ -311,6 +506,47 @@ impl Ulid {
         let nanos: u32 = ((timestamp % 1000) * 1_000_000) as u32;
 
         Utc.timestamp(seconds, nanos)
+    }
+
+    /// Returns a new ULID with the random part incremented by one.
+    ///
+    /// Overflowing the random part resets it to zero without influencing
+    /// the timestamp.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use rusty_ulid::Ulid;
+    /// let ulid = Ulid::from(0);
+    /// let incremented = ulid.increment();
+    /// assert_eq!(incremented, Ulid::from(1));
+    /// ```
+    ///
+    /// ```
+    /// # use rusty_ulid::Ulid;
+    /// let ulid = Ulid::from(0xFFFF_FFFF_FFFF_FFFF_FFFE);
+    /// let incremented = ulid.increment();
+    /// assert_eq!(incremented, Ulid::from(0xFFFF_FFFF_FFFF_FFFF_FFFF));
+    /// ```
+    ///
+    /// ```
+    /// # use rusty_ulid::Ulid;
+    /// let ulid = Ulid::from(0xFFFF_FFFF_FFFF_FFFF_FFFF);
+    /// let incremented = ulid.increment();
+    /// assert_eq!(incremented, Ulid::from(0));
+    /// ```
+    pub fn increment(self) -> Ulid {
+        const TIMESTAMP_PART_MASK: u128 = 0xFFFF_FFFF_FFFF_0000_0000_0000_0000_0000;
+        const RANDOM_PART_MASK: u128 = !TIMESTAMP_PART_MASK;
+
+        let value: u128 = self.into();
+
+        if value & RANDOM_PART_MASK == RANDOM_PART_MASK {
+            // overflow, set random part to zero
+            (value & TIMESTAMP_PART_MASK).into()
+        } else {
+            (value + 1).into()
+        }
     }
 
     /// Returns the string representaton of this ULID.
@@ -452,7 +688,6 @@ impl From<Ulid> for [u8; 16] {
             ((value.0 >> 16) & 0xff) as u8,
             ((value.0 >> 8) & 0xff) as u8,
             (value.0 & 0xff) as u8,
-            
             ((value.1 >> 56) & 0xff) as u8,
             ((value.1 >> 48) & 0xff) as u8,
             ((value.1 >> 40) & 0xff) as u8,
@@ -594,6 +829,32 @@ mod tests {
 
     const MIN_TIMESTAMP: u64 = 0;
     const MIN_TIMESTAMP_PART: &str = "0000000000";
+
+    #[test]
+    fn increment() {
+        single_increment(0x0000_0000_0000_0000_0000_0000_0000_0000, Ulid::from(1));
+        single_increment(
+            0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFE,
+            Ulid::from(0xFFFF_FFFF_FFFF_FFFF_FFFF),
+        );
+        single_increment(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFF, Ulid::from(0));
+        single_increment(
+            0x0000_0000_0001_0000_0000_0000_0000_0000,
+            Ulid::from(0x0000_0000_0001_0000_0000_0000_0000_0001),
+        );
+        single_increment(
+            0x0000_0000_0001_FFFF_FFFF_FFFF_FFFF_FFFF,
+            Ulid::from(0x0000_0000_0001_0000_0000_0000_0000_0000),
+        );
+    }
+
+    fn single_increment(input: u128, expected_result: Ulid) {
+        let input_value: Ulid = input.into();
+        let incremented = input_value.clone().increment();
+
+        assert_eq!(incremented, expected_result);
+        assert_eq!(input_value.datetime(), incremented.datetime());
+    }
 
     #[test]
     fn from_string_to_string() {
