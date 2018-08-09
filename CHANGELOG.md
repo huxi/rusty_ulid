@@ -5,20 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [Unreleased][unreleased]
 
-## 0.5.0 - 2018-08-09
+## [0.5.0] - 2018-08-09
 ### Added
 - support for monotonic ULID values. See `next_monotonic` and `next_strictly_monotonic`.
 
 ### Changed
 - updated dependencies.
 
-## 0.4.1 - 2018-07-02
+## [0.4.1] - 2018-07-02
 ### Changed
 - `description()` of `DecodingError` is now returning deprecation message like Rust 1.27.
 
-## 0.4.0 - 2018-05-23
+## [0.4.0] - 2018-05-23
 ### Added
 - `append_crockford_u64_tuple` and `parse_crockford_u64_tuple`.
 
@@ -34,7 +34,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Performance regression. This version is faster than `0.2.0`, even with `rand 0.4.2`.
 
-## 0.3.0 - 2018-05-12
+## [0.3.0] - 2018-05-12
 ### Added
 - Conversion of `Ulid` to and from `u128`.
 - `append_crockford_u128` and `parse_crockford_u128`.
@@ -55,11 +55,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 - `Copy` trait from `Ulid`.
 
-## 0.2.1 - 2018-04-10
+## [0.2.1] - 2018-04-10
 ### Fixed
 - Documentation test of `Ulid::from_timestamp_with_rng`.
 
-## 0.2.0 - 2018-04-10
+## [0.2.0] - 2018-04-10
 ### Added
 - This changelog.
 - Some criterion benchmarks. Run the benchmarks by executing `cargo bench`.
@@ -81,6 +81,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   This means that `Ulid::new()` will start to panic after `+10889-08-02T05:31:50.655Z`.  
   `#Y10889Bug`
 
-## 0.1.0 - 2018-04-09
+## [0.1.0] - 2018-04-09
 ### Added
 - Everything. This was the initial release.
+
+[unreleased]: https://github.com/huxi/rusty_ulid/compare/0.5.0...HEAD
+[0.5.0]: https://github.com/huxi/rusty_ulid/compare/0.4.1...0.5.0
+[0.4.1]: https://github.com/huxi/rusty_ulid/compare/0.4.0...0.4.1
+[0.4.0]: https://github.com/huxi/rusty_ulid/compare/0.3.0...0.4.0
+[0.3.0]: https://github.com/huxi/rusty_ulid/compare/0.2.1...0.3.0
+[0.2.1]: https://github.com/huxi/rusty_ulid/compare/0.2.0...0.2.1
+[0.2.0]: https://github.com/huxi/rusty_ulid/compare/0.1.0...0.2.0
+[0.1.0]: https://github.com/huxi/rusty_ulid/compare/init...0.1.0
