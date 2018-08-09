@@ -37,7 +37,7 @@
  * limitations under the License.
  */
 
-#![doc(html_root_url = "https://docs.rs/rusty_ulid/0.4.1")]
+#![doc(html_root_url = "https://docs.rs/rusty_ulid/0.5.0")]
 #![deny(warnings, missing_docs)]
 //! # ULID - Universally Unique Lexicographically Sortable Identifier
 //!
