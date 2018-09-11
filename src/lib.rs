@@ -38,7 +38,10 @@
  */
 
 #![doc(html_root_url = "https://docs.rs/rusty_ulid/0.5.0")]
-#![deny(warnings, missing_docs)]
+#![deny(missing_docs)]
+//#![deny(warnings, missing_docs)]
+//#![feature(tool_lints)]
+
 //! # ULID - Universally Unique Lexicographically Sortable Identifier
 //!
 //! UUID can be suboptimal for many uses-cases because:
@@ -436,6 +439,7 @@ impl Ulid {
     /// Panics if `timestamp` is larger than `0xFFFF_FFFF_FFFF`.
     // https://users.rust-lang.org/t/i-have-a-strange-documentation-test-issue-related-to-extern-crate/16709
     #[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
+    //#[allow(clippy::needless_pass_by_value)]
     pub fn next_strictly_monotonic_from_timestamp_with_rng<R>(
         previous_ulid: Ulid,
         timestamp: u64,
