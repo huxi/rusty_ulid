@@ -264,7 +264,7 @@ impl Ulid {
 
     /// Creates the next strictly monotonic ULID for the given `previous_ulid`.
     ///
-    /// If the random part of `previous_ulid` would overflow, this function `None`.
+    /// If the random part of `previous_ulid` would overflow, this function returns `None`.
     ///
     /// # Examples
     ///
@@ -351,10 +351,10 @@ impl Ulid {
     /// # extern crate rusty_ulid;
     /// # use rusty_ulid::Ulid;
     /// # fn main() {
-    /// let previous_ulid = Ulid::from(0xFFFF_FFFF_FFFF_FFFF_FFFE);
+    /// let previous_ulid = Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFE);
     /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::thread_rng());
     ///
-    /// assert_eq!(ulid, Ulid::from(0xFFFF_FFFF_FFFF_FFFF_FFFF));
+    /// assert_eq!(ulid, Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFF));
     /// # }
     /// ```
     ///
@@ -363,7 +363,7 @@ impl Ulid {
     /// # extern crate rusty_ulid;
     /// # use rusty_ulid::Ulid;
     /// # fn main() {
-    /// let previous_ulid = Ulid::from(0xFFFF_FFFF_FFFF_FFFF_FFFF);
+    /// let previous_ulid = Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFF);
     /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::thread_rng());
     ///
     /// // overflow results in zero random part
@@ -414,10 +414,10 @@ impl Ulid {
     /// # extern crate rusty_ulid;
     /// # use rusty_ulid::Ulid;
     /// # fn main() {
-    /// let previous_ulid = Ulid::from(0xFFFF_FFFF_FFFF_FFFF_FFFE);
+    /// let previous_ulid = Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFE);
     /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::thread_rng());
     ///
-    /// assert_eq!(ulid, Some(Ulid::from(0xFFFF_FFFF_FFFF_FFFF_FFFF)));
+    /// assert_eq!(ulid, Some(Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFF)));
     /// # }
     /// ```
     ///
@@ -426,7 +426,7 @@ impl Ulid {
     /// # extern crate rusty_ulid;
     /// # use rusty_ulid::Ulid;
     /// # fn main() {
-    /// let previous_ulid = Ulid::from(0xFFFF_FFFF_FFFF_FFFF_FFFF);
+    /// let previous_ulid = Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFF);
     /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::thread_rng());
     ///
     /// // overflow results in None
@@ -529,14 +529,14 @@ impl Ulid {
     ///
     /// ```
     /// # use rusty_ulid::Ulid;
-    /// let ulid = Ulid::from(0xFFFF_FFFF_FFFF_FFFF_FFFE);
+    /// let ulid = Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFE);
     /// let incremented = ulid.increment();
-    /// assert_eq!(incremented, Ulid::from(0xFFFF_FFFF_FFFF_FFFF_FFFF));
+    /// assert_eq!(incremented, Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFF));
     /// ```
     ///
     /// ```
     /// # use rusty_ulid::Ulid;
-    /// let ulid = Ulid::from(0xFFFF_FFFF_FFFF_FFFF_FFFF);
+    /// let ulid = Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFF);
     /// let incremented = ulid.increment();
     /// assert_eq!(incremented, Ulid::from(0));
     /// ```
