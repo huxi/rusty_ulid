@@ -13,7 +13,7 @@ categories = ["data-structures","date-and-time","encoding","parsing","value-form
 
 [dependencies]
 rand = "0.5.5"
-chrono = "0.4.5"
+chrono = "0.4.6"
 
 [dev-dependencies]
 criterion = "0.2"
