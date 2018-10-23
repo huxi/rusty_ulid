@@ -207,7 +207,7 @@ pub fn new_ulid_bytes() -> [u8; 16] {
     Ulid::new().into()
 }
 
-#[derive(Debug, PartialOrd, Ord, PartialEq, Eq, Clone, Hash)]
+#[derive(Debug, PartialOrd, Ord, PartialEq, Eq, Clone, Copy, Hash)]
 /// The ULID data type.
 pub struct Ulid {
     value: (u64, u64),
@@ -447,8 +447,6 @@ impl Ulid {
     ///
     /// Panics if `timestamp` is larger than `0xFFFF_FFFF_FFFF`.
     // https://users.rust-lang.org/t/i-have-a-strange-documentation-test-issue-related-to-extern-crate/16709
-    #[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
-    //#[allow(clippy::needless_pass_by_value)]
     pub fn next_strictly_monotonic_from_timestamp_with_rng<R>(
         previous_ulid: Ulid,
         timestamp: u64,
@@ -457,8 +455,7 @@ impl Ulid {
     where
         R: rand::Rng,
     {
-        let result =
-            Ulid::next_monotonic_from_timestamp_with_rng(previous_ulid.clone(), timestamp, rng);
+        let result = Ulid::next_monotonic_from_timestamp_with_rng(previous_ulid, timestamp, rng);
 
         if previous_ulid < result {
             Some(result)
