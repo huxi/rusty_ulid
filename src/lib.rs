@@ -207,12 +207,21 @@ pub fn new_ulid_bytes() -> [u8; 16] {
     Ulid::new().into()
 }
 
-#[derive(Debug, Default, PartialOrd, Ord, PartialEq, Eq, Clone, Hash)]
+#[derive(Debug, PartialOrd, Ord, PartialEq, Eq, Clone, Hash)]
 /// The ULID data type.
 pub struct Ulid {
     value: (u64, u64),
 }
 
+/*
+impl Default for Ulid {
+    fn default() -> Ulid {
+        Ulid::new()
+    }
+}
+*/
+
+#[cfg_attr(feature = "cargo-clippy", allow(new_without_default_derive))]
 impl Ulid {
     /// Creates a new ULID.
     ///
@@ -1119,4 +1128,25 @@ mod tests {
 
         assert_eq!(ulid_value, 0x0000_0000_0000_F00F_0000_0000_0000_F00F);
     }
+
+    /*
+    #[test]
+    fn test_default() {
+        let ulid: Ulid = Default::default();
+    
+        println!("ulid: {}", ulid);
+    
+        let ulid_value: u128 = ulid.into();
+    
+        assert_ne!(ulid_value, 0x0000_0000_0000_0000_0000_0000_0000_0000);
+    
+        let ulid: Ulid = Default::default();
+    
+        println!("ulid: {}", ulid);
+    
+        let ulid_value: u128 = ulid.into();
+    
+        assert_ne!(ulid_value, 0x0000_0000_0000_0000_0000_0000_0000_0000);
+    }
+    */
 }
