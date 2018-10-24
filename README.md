@@ -15,6 +15,7 @@ Take a look at the [changelog][changelog] for a detailed list of all changes.
 ## Features
 - lenient parsing of ULID strings as specified in [Crockford Base32 Encoding][crockford].
 - straight-forward creation of string and binary ULIDs.
+- optional support for monotonic ULIDs.
 - conversion to and from `[u8; 16]`.
 - conversion to and from `(u64, u64)`.
 - conversion to and from `u128`.
@@ -62,6 +63,12 @@ let ulid: Ulid = "01CAT3X5Y5G9A62FH1FA6T9GVR".parse()?;
 let datetime = ulid.datetime();
 assert_eq!(datetime.to_string(), "2018-04-11 10:27:03.749 UTC");
 ```
+
+Monotonic ULIDs are supported via `Ulid::next_monotonic(previous_ulid) -> Ulid` and
+`Ulid::next_strictly_monotonic(previous_ulid) -> Option<Ulid>`.
+
+`next_monotonic` allows overflow of the random part to zero while `next_strictly_monotonic`
+returns `None` instead.
 
 ## Benchmark
 
