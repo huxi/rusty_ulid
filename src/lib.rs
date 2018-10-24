@@ -850,7 +850,7 @@ mod tests {
 
     fn single_increment(input: u128, expected_result: Ulid) {
         let input_value: Ulid = input.into();
-        let incremented = input_value.clone().increment();
+        let incremented = input_value.increment();
 
         assert_eq!(incremented, expected_result);
         assert_eq!(input_value.datetime(), incremented.datetime());
