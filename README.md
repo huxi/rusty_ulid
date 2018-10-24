@@ -23,15 +23,15 @@ Take a look at the [changelog][changelog] for a detailed list of all changes.
 
 ```rust
 extern crate rusty_ulid;
-use rusty_ulid::new_ulid_string;
-use rusty_ulid::new_ulid_bytes;
+use rusty_ulid::generate_ulid_string;
+use rusty_ulid::generate_ulid_bytes;
 
 // Generate a ULID string
-let ulid_string: String = new_ulid_string();
+let ulid_string: String = generate_ulid_string();
 assert_eq!(ulid_string.len(), 26);
 
 // Generate ULID bytes
-let ulid_bytes: [u8; 16] = new_ulid_bytes();
+let ulid_bytes: [u8; 16] = generate_ulid_bytes();
 assert_eq!(ulid_bytes.len(), 16);
 ```
 
@@ -40,7 +40,7 @@ extern crate rusty_ulid;
 use rusty_ulid::Ulid;
 
 // Generate a ULID
-let ulid = Ulid::new();
+let ulid = Ulid::generate();
 
 // Generate a string for a ULID
 let ulid_string = ulid.to_string();

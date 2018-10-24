@@ -38,9 +38,7 @@
  */
 
 #![doc(html_root_url = "https://docs.rs/rusty_ulid/0.5.0")]
-#![deny(missing_docs)]
-//#![deny(warnings, missing_docs)]
-//#![feature(tool_lints)]
+#![deny(warnings, missing_docs)]
 
 //! # ULID - Universally Unique Lexicographically Sortable Identifier
 //!
@@ -177,34 +175,34 @@ fn unix_epoch_ms() -> u64 {
 
 /// Returns a new ULID string.
 ///
-/// This function is a shortcut for `Ulid::new().to_string()`.
+/// This function is a shortcut for `Ulid::generate().to_string()`.
 ///
 /// # Example
 /// ```
-/// # use rusty_ulid::new_ulid_string;
-/// let ulid_string = new_ulid_string();
+/// # use rusty_ulid::generate_ulid_string;
+/// let ulid_string = generate_ulid_string();
 ///
 /// // every ulid has exactly 26 characters
 /// assert_eq!(ulid_string.len(), 26);
 /// ```
-pub fn new_ulid_string() -> String {
-    Ulid::new().to_string()
+pub fn generate_ulid_string() -> String {
+    Ulid::generate().to_string()
 }
 
 /// Returns new ULID bytes.
 ///
-/// This function is a shortcut for `Ulid::new().into()`.
+/// This function is a shortcut for `Ulid::generate().into()`.
 ///
 /// # Example
 /// ```
-/// # use rusty_ulid::new_ulid_bytes;
-/// let ulid_bytes = new_ulid_bytes();
+/// # use rusty_ulid::generate_ulid_bytes;
+/// let ulid_bytes = generate_ulid_bytes();
 ///
 /// // a binary ulid has exactly 16 bytes
 /// assert_eq!(ulid_bytes.len(), 16);
 /// ```
-pub fn new_ulid_bytes() -> [u8; 16] {
-    Ulid::new().into()
+pub fn generate_ulid_bytes() -> [u8; 16] {
+    Ulid::generate().into()
 }
 
 #[derive(Debug, PartialOrd, Ord, PartialEq, Eq, Clone, Copy, Hash)]
@@ -213,15 +211,6 @@ pub struct Ulid {
     value: (u64, u64),
 }
 
-/*
-impl Default for Ulid {
-    fn default() -> Ulid {
-        Ulid::new()
-    }
-}
-*/
-
-#[cfg_attr(feature = "cargo-clippy", allow(new_without_default_derive))]
 impl Ulid {
     /// Creates a new ULID.
     ///
@@ -229,7 +218,7 @@ impl Ulid {
     ///
     /// ```
     /// # use rusty_ulid::Ulid;
-    /// let ulid = Ulid::new();
+    /// let ulid = Ulid::generate();
     ///
     /// assert_ne!(0, ulid.timestamp());
     ///
@@ -241,7 +230,7 @@ impl Ulid {
     /// # Panics
     ///
     /// Panics if called after `+10889-08-02T05:31:50.655Z`.
-    pub fn new() -> Ulid {
+    pub fn generate() -> Ulid {
         Ulid::from_timestamp_with_rng(unix_epoch_ms(), &mut rand::thread_rng())
     }
 
@@ -1067,9 +1056,20 @@ mod tests {
     }
 
     #[test]
+    fn fn_quickstart() {
+        // Generate a ULID string
+        let ulid_string: String = generate_ulid_string();
+        assert_eq!(ulid_string.len(), 26);
+
+        // Generate ULID bytes
+        let ulid_bytes: [u8; 16] = generate_ulid_bytes();
+        assert_eq!(ulid_bytes.len(), 16);
+    }
+
+    #[test]
     fn quickstart() {
         // Generate a ULID
-        let ulid = Ulid::new();
+        let ulid = Ulid::generate();
 
         // Generate a string for a ULID
         let ulid_string = ulid.to_string();
@@ -1078,17 +1078,6 @@ mod tests {
         let result = Ulid::from_str(&ulid_string);
 
         assert_eq!(Ok(ulid), result);
-    }
-
-    #[test]
-    fn fn_quickstart() {
-        // Generate a ULID string
-        let ulid_string: String = new_ulid_string();
-        assert_eq!(ulid_string.len(), 26);
-
-        // Generate ULID bytes
-        let ulid_bytes: [u8; 16] = new_ulid_bytes();
-        assert_eq!(ulid_bytes.len(), 16);
     }
 
     #[test]

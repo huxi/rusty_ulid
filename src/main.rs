@@ -103,7 +103,7 @@ fn main_with_args_and_return_value(args: Vec<String>) -> i32 {
 
     if ulid_candidates.is_empty() {
         // not checking, producing
-        let ulid = Ulid::new();
+        let ulid = Ulid::generate();
         println!("{}", ulid);
         if verbose {
             println!("{}", ulid.datetime());

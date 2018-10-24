@@ -8,8 +8,10 @@ use rusty_ulid::*;
 use std::str::FromStr;
 
 fn criterion_benchmark(c: &mut Criterion) {
-    c.bench_function("new_ulid_string", |b| b.iter(|| new_ulid_string()));
-    c.bench_function("new_ulid_bytes", |b| b.iter(|| new_ulid_bytes()));
+    c.bench_function("generate_ulid_string", |b| {
+        b.iter(|| generate_ulid_string())
+    });
+    c.bench_function("generate_ulid_bytes", |b| b.iter(|| generate_ulid_bytes()));
     c.bench_function("from_str", |b| {
         b.iter(|| Ulid::from_str("01CAH7NXGRDJNE9B1NY7PQGYV7"))
     });

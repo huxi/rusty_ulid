@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - derive `Copy` for `Ulid`.
 
+### Changed
+- renamed `Ulid::new()` to `Ulid::generate()`.
+- renamed `new_ulid_string()` to `generate_ulid_string()`.
+- renamed `new_ulid_bytes()` to `generate_ulid_bytes()`.
+
 ### Removed
 - derive `Default` for `Ulid`.
 
