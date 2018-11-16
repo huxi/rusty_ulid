@@ -41,6 +41,7 @@
 use std::error::Error;
 use std::fmt;
 
+// #[rustfmt::skip] requires Rust 1.30 or later
 #[cfg_attr(rustfmt, rustfmt_skip)]
 static ENCODING_DIGITS: [char; 32] = [
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
