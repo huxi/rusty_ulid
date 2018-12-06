@@ -8,7 +8,7 @@
 
 This is a Rust implementation of the [ULID][ulid] Universally Unique Lexicographically Sortable Identifiers.
 
-This crate requires **Rust 1.26 or later** because it is supporting `u128`.
+This crate requires **Rust 1.31 or later**.
 
 Take a look at the [changelog][changelog] for a detailed list of all changes.
 
@@ -23,7 +23,6 @@ Take a look at the [changelog][changelog] for a detailed list of all changes.
 ## Quickstart
 
 ```rust
-extern crate rusty_ulid;
 use rusty_ulid::generate_ulid_string;
 use rusty_ulid::generate_ulid_bytes;
 
@@ -37,7 +36,6 @@ assert_eq!(ulid_bytes.len(), 16);
 ```
 
 ```rust
-extern crate rusty_ulid;
 use rusty_ulid::Ulid;
 
 // Generate a ULID
@@ -53,7 +51,6 @@ assert_eq!(Ok(ulid), result);
 ```
 
 ```rust
-extern crate rusty_ulid;
 use rusty_ulid::Ulid;
 
 // Alternative way to parse a ULID string

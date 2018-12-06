@@ -151,8 +151,6 @@
 //!
 //! [ulidspec]: https://github.com/ulid/spec
 //! [crockford]: https://crockford.com/wrmg/base32.html
-extern crate chrono;
-extern crate rand;
 
 use chrono::prelude::{DateTime, TimeZone, Utc};
 use std::fmt;
@@ -163,7 +161,7 @@ use std::str::FromStr;
 ///
 /// [crockford]: https://crockford.com/wrmg/base32.html
 pub mod crockford;
-pub use crockford::DecodingError;
+pub use crate::crockford::DecodingError;
 
 /// Returns the number of non-leap milliseconds since January 1, 1970 0:00:00 UTC
 /// (aka "UNIX timestamp").
@@ -217,7 +215,8 @@ impl Ulid {
     /// # Examples
     ///
     /// ```
-    /// # use rusty_ulid::Ulid;
+    /// use rusty_ulid::Ulid;
+    ///
     /// let ulid = Ulid::generate();
     ///
     /// assert_ne!(0, ulid.timestamp());
@@ -242,7 +241,8 @@ impl Ulid {
     /// # Examples
     ///
     /// ```
-    /// # use rusty_ulid::Ulid;
+    /// use rusty_ulid::Ulid;
+    ///
     /// let previous_ulid = Ulid::from(0);
     /// let ulid = Ulid::next_monotonic(previous_ulid);
     ///
@@ -267,7 +267,8 @@ impl Ulid {
     /// # Examples
     ///
     /// ```
-    /// # use rusty_ulid::Ulid;
+    /// use rusty_ulid::Ulid;
+    ///
     /// let previous_ulid = Ulid::from(0);
     /// let ulid = Ulid::next_strictly_monotonic(previous_ulid);
     ///
@@ -293,21 +294,18 @@ impl Ulid {
     /// # Examples
     ///
     /// ```
-    /// extern crate rand;
-    /// # extern crate rusty_ulid;
-    /// # use rusty_ulid::Ulid;
-    /// # fn main() {
+    /// use rusty_ulid::Ulid;
+    ///
     /// let ulid = Ulid::from_timestamp_with_rng(0, &mut rand::thread_rng());
     ///
     /// let timestamp = ulid.timestamp();
+    ///
     /// assert_eq!(timestamp, 0);
-    /// # }
     /// ```
     ///
     /// # Panics
     ///
     /// Panics if `timestamp` is larger than `0xFFFF_FFFF_FFFF`.
-    // https://users.rust-lang.org/t/i-have-a-strange-documentation-test-issue-related-to-extern-crate/16709
     pub fn from_timestamp_with_rng<R>(timestamp: u64, rng: &mut R) -> Ulid
     where
         R: rand::Rng,
@@ -332,46 +330,36 @@ impl Ulid {
     /// # Examples
     ///
     /// ```
-    /// extern crate rand;
-    /// # extern crate rusty_ulid;
-    /// # use rusty_ulid::Ulid;
-    /// # fn main() {
+    /// use rusty_ulid::Ulid;
+    ///
     /// let previous_ulid = Ulid::from(0);
     /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::thread_rng());
     ///
     /// assert_eq!(ulid, Ulid::from(1));
-    /// # }
     /// ```
     ///
     /// ```
-    /// extern crate rand;
-    /// # extern crate rusty_ulid;
-    /// # use rusty_ulid::Ulid;
-    /// # fn main() {
+    /// use rusty_ulid::Ulid;
+    ///
     /// let previous_ulid = Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFE);
     /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::thread_rng());
     ///
     /// assert_eq!(ulid, Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFF));
-    /// # }
     /// ```
     ///
     /// ```
-    /// extern crate rand;
-    /// # extern crate rusty_ulid;
-    /// # use rusty_ulid::Ulid;
-    /// # fn main() {
+    /// use rusty_ulid::Ulid;
+    ///
     /// let previous_ulid = Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFF);
     /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::thread_rng());
     ///
     /// // overflow results in zero random part
     /// assert_eq!(ulid, Ulid::from(0));
-    /// # }
     /// ```
     ///
     /// # Panics
     ///
     /// Panics if `timestamp` is larger than `0xFFFF_FFFF_FFFF`.
-    // https://users.rust-lang.org/t/i-have-a-strange-documentation-test-issue-related-to-extern-crate/16709
     pub fn next_monotonic_from_timestamp_with_rng<R>(
         previous_ulid: Ulid,
         timestamp: u64,
@@ -395,46 +383,36 @@ impl Ulid {
     /// # Examples
     ///
     /// ```
-    /// extern crate rand;
-    /// # extern crate rusty_ulid;
-    /// # use rusty_ulid::Ulid;
-    /// # fn main() {
+    /// use rusty_ulid::Ulid;
+    ///
     /// let previous_ulid = Ulid::from(0);
     /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::thread_rng());
     ///
     /// assert_eq!(ulid, Some(Ulid::from(1)));
-    /// # }
     /// ```
     ///
     /// ```
-    /// extern crate rand;
-    /// # extern crate rusty_ulid;
-    /// # use rusty_ulid::Ulid;
-    /// # fn main() {
+    /// use rusty_ulid::Ulid;
+    ///
     /// let previous_ulid = Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFE);
     /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::thread_rng());
     ///
     /// assert_eq!(ulid, Some(Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFF)));
-    /// # }
     /// ```
     ///
     /// ```
-    /// extern crate rand;
-    /// # extern crate rusty_ulid;
-    /// # use rusty_ulid::Ulid;
-    /// # fn main() {
+    /// use rusty_ulid::Ulid;
+    ///
     /// let previous_ulid = Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFF);
     /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::thread_rng());
     ///
     /// // overflow results in None
     /// assert_eq!(ulid, None);
-    /// # }
     /// ```
     ///
     /// # Panics
     ///
     /// Panics if `timestamp` is larger than `0xFFFF_FFFF_FFFF`.
-    // https://users.rust-lang.org/t/i-have-a-strange-documentation-test-issue-related-to-extern-crate/16709
     pub fn next_strictly_monotonic_from_timestamp_with_rng<R>(
         previous_ulid: Ulid,
         timestamp: u64,
@@ -458,20 +436,17 @@ impl Ulid {
     /// # Examples
     ///
     /// ```
-    /// # use std::error::Error;
-    /// # use rusty_ulid::Ulid;
-    /// # use std::str::FromStr;
-    /// #
-    /// # fn try_main() -> Result<(), Box<Error>> {
+    /// # fn main() -> Result<(), rusty_ulid::DecodingError> {
+    /// # // https://github.com/rust-lang/rust/issues/56260
+    /// use rusty_ulid::Ulid;
+    /// use std::str::FromStr;
+    ///
     /// let ulid = Ulid::from_str("01CAH7NXGRDJNE9B1NY7PQGYV7");
     /// let timestamp = ulid?.timestamp();
+    ///
     /// assert_eq!(timestamp, 1523144390168);
     /// #
     /// #     Ok(())
-    /// # }
-    /// #
-    /// # fn main() {
-    /// #     try_main().unwrap();
     /// # }
     /// ```
     pub fn timestamp(&self) -> u64 {
@@ -483,20 +458,17 @@ impl Ulid {
     /// # Examples
     ///
     /// ```
-    /// # use std::error::Error;
-    /// # use rusty_ulid::Ulid;
-    /// # use std::str::FromStr;
-    /// #
-    /// # fn try_main() -> Result<(), Box<Error>> {
+    /// # fn main() -> Result<(), rusty_ulid::DecodingError> {
+    /// # // https://github.com/rust-lang/rust/issues/56260
+    /// use rusty_ulid::Ulid;
+    /// use std::str::FromStr;
+    ///
     /// let ulid = Ulid::from_str("01CAH7NXGRDJNE9B1NY7PQGYV7");
     /// let datetime = ulid?.datetime();
+    ///
     /// assert_eq!(datetime.to_string(), "2018-04-07 23:39:50.168 UTC");
     /// #
     /// #     Ok(())
-    /// # }
-    /// #
-    /// # fn main() {
-    /// #     try_main().unwrap();
     /// # }
     /// ```
     pub fn datetime(&self) -> DateTime<Utc> {
@@ -515,23 +487,29 @@ impl Ulid {
     /// # Examples
     ///
     /// ```
-    /// # use rusty_ulid::Ulid;
+    /// use rusty_ulid::Ulid;
+    ///
     /// let ulid = Ulid::from(0);
     /// let incremented = ulid.increment();
+    ///
     /// assert_eq!(incremented, Ulid::from(1));
     /// ```
     ///
     /// ```
-    /// # use rusty_ulid::Ulid;
+    /// use rusty_ulid::Ulid;
+    ///
     /// let ulid = Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFE);
     /// let incremented = ulid.increment();
+    ///
     /// assert_eq!(incremented, Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFF));
     /// ```
     ///
     /// ```
-    /// # use rusty_ulid::Ulid;
+    /// use rusty_ulid::Ulid;
+    ///
     /// let ulid = Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFF);
     /// let incremented = ulid.increment();
+    ///
     /// assert_eq!(incremented, Ulid::from(0));
     /// ```
     pub fn increment(self) -> Ulid {
@@ -553,14 +531,18 @@ impl Ulid {
     /// # Examples
     ///
     /// ```
-    /// # use rusty_ulid::Ulid;
+    /// use rusty_ulid::Ulid;
+    ///
     /// let ulid = Ulid::from(0);
+    ///
     /// assert_eq!(ulid.to_string(), "00000000000000000000000000");
     /// ```
     ///
     /// ```
-    /// # use rusty_ulid::Ulid;
+    /// use rusty_ulid::Ulid;
+    ///
     /// let ulid = Ulid::from(0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF);
+    ///
     /// assert_eq!(ulid.to_string(), "7ZZZZZZZZZZZZZZZZZZZZZZZZZ");
     /// ```
     pub fn to_string(&self) -> String {
@@ -592,7 +574,8 @@ impl From<[u8; 16]> for Ulid {
     /// # Examples
     ///
     /// ```
-    /// # use rusty_ulid::Ulid;
+    /// use rusty_ulid::Ulid;
+    ///
     /// let bytes: [u8; 16] = [
     ///     0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
     ///     0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xF0, 0x0F,
@@ -606,7 +589,8 @@ impl From<[u8; 16]> for Ulid {
     /// ```
     ///
     /// ```
-    /// # use rusty_ulid::Ulid;
+    /// use rusty_ulid::Ulid;
+    ///
     /// let bytes: [u8; 16] = [
     ///     0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
     ///     0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xF0, 0x0F,
@@ -648,7 +632,8 @@ impl From<Ulid> for [u8; 16] {
     /// # Examples
     ///
     /// ```
-    /// # use rusty_ulid::Ulid;
+    /// use rusty_ulid::Ulid;
+    /// 
     /// let ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
     ///
     /// let bytes = <[u8; 16]>::from(ulid);
@@ -662,7 +647,8 @@ impl From<Ulid> for [u8; 16] {
     /// ```
     ///
     /// ```
-    /// # use rusty_ulid::Ulid;
+    /// use rusty_ulid::Ulid;
+    /// 
     /// let ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
     ///
     /// let bytes: [u8; 16] = ulid.into();
@@ -703,7 +689,8 @@ impl From<(u64, u64)> for Ulid {
     /// # Examples
     ///
     /// ```
-    /// # use rusty_ulid::Ulid;
+    /// use rusty_ulid::Ulid;
+    ///
     /// let tuple = (0x1122_3344_5566_7788, 0x99AA_BBCC_DDEE_F00F);
     ///
     /// let ulid = Ulid::from(tuple);
@@ -714,7 +701,8 @@ impl From<(u64, u64)> for Ulid {
     /// ```
     ///
     /// ```
-    /// # use rusty_ulid::Ulid;
+    /// use rusty_ulid::Ulid;
+    ///
     /// let tuple = (0x1122_3344_5566_7788, 0x99AA_BBCC_DDEE_F00F);
     ///
     /// let ulid : Ulid = tuple.into();
@@ -732,7 +720,8 @@ impl From<Ulid> for (u64, u64) {
     /// # Examples
     ///
     /// ```
-    /// # use rusty_ulid::Ulid;
+    /// use rusty_ulid::Ulid;
+    ///
     /// let ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
     ///
     /// let tuple = <(u64, u64)>::from(ulid);
@@ -743,7 +732,8 @@ impl From<Ulid> for (u64, u64) {
     /// ```
     ///
     /// ```
-    /// # use rusty_ulid::Ulid;
+    /// use rusty_ulid::Ulid;
+    ///
     /// let ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
     ///
     /// let tuple : (u64, u64) = ulid.into();
@@ -761,7 +751,8 @@ impl From<u128> for Ulid {
     /// # Examples
     ///
     /// ```
-    /// # use rusty_ulid::Ulid;
+    /// use rusty_ulid::Ulid;
+    ///
     /// let value = 0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F;
     ///
     /// let ulid = Ulid::from(value);
@@ -772,7 +763,8 @@ impl From<u128> for Ulid {
     /// ```
     ///
     /// ```
-    /// # use rusty_ulid::Ulid;
+    /// use rusty_ulid::Ulid;
+    ///
     /// let value = 0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F;
     ///
     /// let ulid : Ulid = value.into();
@@ -791,7 +783,8 @@ impl From<Ulid> for u128 {
     /// # Examples
     ///
     /// ```
-    /// # use rusty_ulid::Ulid;
+    /// use rusty_ulid::Ulid;
+    ///
     /// let ulid = Ulid::from((0x1122_3344_5566_7788, 0x99AA_BBCC_DDEE_F00F));
     ///
     /// let value = <u128>::from(ulid);
@@ -802,7 +795,8 @@ impl From<Ulid> for u128 {
     /// ```
     ///
     /// ```
-    /// # use rusty_ulid::Ulid;
+    /// use rusty_ulid::Ulid;
+    ///
     /// let ulid = Ulid::from((0x1122_3344_5566_7788, 0x99AA_BBCC_DDEE_F00F));
     ///
     /// let value : u128 = ulid.into();

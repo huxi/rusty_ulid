@@ -123,12 +123,7 @@ pub enum DecodingError {
     DataTypeOverflow,
 }
 
-impl Error for DecodingError {
-    // not necessary since Rust 1.27 but left intact for now to stay compatible with 1.26
-    fn description(&self) -> &str {
-        "description() is deprecated; use Display"
-    }
-}
+impl Error for DecodingError {}
 
 impl fmt::Display for DecodingError {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
@@ -221,10 +216,10 @@ pub fn append_crockford_u128(value: u128, to_append_to: &mut String) {
 /// `i` and `l` will be treated as `1` and `o` will be treated as `0`.
 ///
 /// ```
-/// # use std::error::Error;
-/// # use rusty_ulid::crockford::*;
-/// #
-/// # fn try_main() -> Result<(), Box<Error>> {
+/// # fn main() -> Result<(), rusty_ulid::DecodingError> {
+/// # // https://github.com/rust-lang/rust/issues/56260
+/// use rusty_ulid::crockford::*;
+///
 /// let parsed = parse_crockford_u128("00000000000000000x1iIlLoO0");
 ///
 /// let mut string_representation = String::new();
@@ -234,24 +229,22 @@ pub fn append_crockford_u128(value: u128, to_append_to: &mut String) {
 /// #
 /// #     Ok(())
 /// # }
-/// #
-/// # fn main() {
-/// #     try_main().unwrap();
-/// # }
 /// ```
 ///
 /// # Errors
 /// Parsing a string with other than 26 bytes results in `InvalidLength`.
 ///
 /// ```
-/// # use rusty_ulid::crockford::*;
+/// use rusty_ulid::crockford::*;
+///
 /// let nope = parse_crockford_u128("1234567890123456789012345");
 ///
 /// assert_eq!(Err(DecodingError::InvalidLength), nope);
 /// ```
 ///
 /// ```
-/// # use rusty_ulid::crockford::*;
+/// use rusty_ulid::crockford::*;
+///
 /// let nope = parse_crockford_u128("123456789012345678901234567");
 ///
 /// assert_eq!(Err(DecodingError::InvalidLength), nope);
@@ -260,7 +253,8 @@ pub fn append_crockford_u128(value: u128, to_append_to: &mut String) {
 /// Parsing 26 bytes results in `DataTypeOverflow` if the `u128` would overflow.
 ///
 /// ```
-/// # use rusty_ulid::crockford::*;
+/// use rusty_ulid::crockford::*;
+///
 /// let yeah = parse_crockford_u128("7ZZZZZZZZZZZZZZZZZZZZZZZZZ");
 ///
 /// assert_eq!(Ok(0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF), yeah);
@@ -269,12 +263,13 @@ pub fn append_crockford_u128(value: u128, to_append_to: &mut String) {
 ///
 /// assert_eq!(Err(DecodingError::DataTypeOverflow), nope);
 /// ```
-//
+///
 /// Parsing a string containing an invalid character results in `InvalidChar` containing
 /// the character.
 ///
 /// ```
-/// # use rusty_ulid::crockford::*;
+/// use rusty_ulid::crockford::*;
+///
 /// let nope = parse_crockford_u128("0000000000000000000000000U");
 ///
 /// assert_eq!(Err(DecodingError::InvalidChar('U')), nope);
@@ -329,30 +324,38 @@ pub fn parse_crockford_u128(input: &str) -> Result<u128, DecodingError> {
 /// # Examples
 ///
 /// ```
-/// # use rusty_ulid::crockford::*;
+/// use rusty_ulid::crockford::*;
+///
 /// let mut a_string = String::new();
 /// append_crockford_u64_tuple((0, 1), &mut a_string);
+///
 /// assert_eq!(a_string, "00000000000000000000000001");
 /// ```
 ///
 /// ```
-/// # use rusty_ulid::crockford::*;
+/// use rusty_ulid::crockford::*;
+///
 /// let mut a_string = String::new();
 /// append_crockford_u64_tuple((0, 0xFF), &mut a_string);
+///
 /// assert_eq!(a_string, "0000000000000000000000007Z");
 /// ```
 ///
 /// ```
-/// # use rusty_ulid::crockford::*;
+/// use rusty_ulid::crockford::*;
+///
 /// let mut a_string = String::new();
 /// append_crockford_u64_tuple((0, 0xFFFF_FFFF_FFFF_FFFF), &mut a_string);
+///
 /// assert_eq!(a_string, "0000000000000FZZZZZZZZZZZZ");
 /// ```
 ///
 /// ```
-/// # use rusty_ulid::crockford::*;
+/// use rusty_ulid::crockford::*;
+///
 /// let mut a_string = String::new();
 /// append_crockford_u64_tuple((0xFFFF_FFFF_FFFF_FFFF, 0xFFFF_FFFF_FFFF_FFFF), &mut a_string);
+///
 /// assert_eq!(a_string, "7ZZZZZZZZZZZZZZZZZZZZZZZZZ");
 /// ```
 pub fn append_crockford_u64_tuple(value: (u64, u64), to_append_to: &mut String) {
@@ -393,7 +396,8 @@ pub fn append_crockford_u64_tuple(value: (u64, u64), to_append_to: &mut String) 
 ///
 /// # Examples
 /// ```
-/// # use rusty_ulid::crockford::*;
+/// use rusty_ulid::crockford::*;
+///
 /// let parsed = parse_crockford_u64_tuple("0000000000000000000000007Z");
 ///
 /// assert_eq!(Ok((0, 0xFF)), parsed);
@@ -403,10 +407,10 @@ pub fn append_crockford_u64_tuple(value: (u64, u64), to_append_to: &mut String) 
 /// `i` and `l` will be treated as `1` and `o` will be treated as `0`.
 ///
 /// ```
-/// # use std::error::Error;
-/// # use rusty_ulid::crockford::*;
-/// #
-/// # fn try_main() -> Result<(), Box<Error>> {
+/// # fn main() -> Result<(), rusty_ulid::DecodingError> {
+/// # // https://github.com/rust-lang/rust/issues/56260
+/// use rusty_ulid::crockford::*;
+///
 /// let parsed = parse_crockford_u64_tuple("00000000000000000x1iIlLoO0");
 ///
 /// let mut string_representation = String::new();
@@ -416,24 +420,22 @@ pub fn append_crockford_u64_tuple(value: (u64, u64), to_append_to: &mut String) 
 /// #
 /// #     Ok(())
 /// # }
-/// #
-/// # fn main() {
-/// #     try_main().unwrap();
-/// # }
 /// ```
 ///
 /// # Errors
 /// Parsing a string with other than 26 bytes results in `InvalidLength`.
 ///
 /// ```
-/// # use rusty_ulid::crockford::*;
+/// use rusty_ulid::crockford::*;
+///
 /// let nope = parse_crockford_u64_tuple("1234567890123456789012345");
 ///
 /// assert_eq!(Err(DecodingError::InvalidLength), nope);
 /// ```
 ///
 /// ```
-/// # use rusty_ulid::crockford::*;
+/// use rusty_ulid::crockford::*;
+///
 /// let nope = parse_crockford_u64_tuple("123456789012345678901234567");
 ///
 /// assert_eq!(Err(DecodingError::InvalidLength), nope);
@@ -442,7 +444,8 @@ pub fn append_crockford_u64_tuple(value: (u64, u64), to_append_to: &mut String) 
 /// Parsing 26 bytes results in `DataTypeOverflow` if the `(u64, u64)` would overflow.
 ///
 /// ```
-/// # use rusty_ulid::crockford::*;
+/// use rusty_ulid::crockford::*;
+///
 /// let yeah = parse_crockford_u64_tuple("7ZZZZZZZZZZZZZZZZZZZZZZZZZ");
 ///
 /// assert_eq!(Ok((0xFFFF_FFFF_FFFF_FFFF, 0xFFFF_FFFF_FFFF_FFFF)), yeah);
@@ -451,12 +454,13 @@ pub fn append_crockford_u64_tuple(value: (u64, u64), to_append_to: &mut String) 
 ///
 /// assert_eq!(Err(DecodingError::DataTypeOverflow), nope);
 /// ```
-//
+///
 /// Parsing a string containing an invalid character results in `InvalidChar` containing
 /// the character.
 ///
 /// ```
-/// # use rusty_ulid::crockford::*;
+/// use rusty_ulid::crockford::*;
+///
 /// let nope = parse_crockford_u64_tuple("0000000000000000000000000U");
 ///
 /// assert_eq!(Err(DecodingError::InvalidChar('U')), nope);

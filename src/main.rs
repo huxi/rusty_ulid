@@ -42,16 +42,11 @@
 
 //! # Command line tool for generating and validating ULIDs
 
-extern crate chrono;
-extern crate rusty_ulid;
-
-mod crockford;
-
 use rusty_ulid::Ulid;
 use std::str::FromStr;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
-static HELP: &str = "rust_ulid
+static HELP: &str = "rusty_ulid
 
 Usage:
     rusty_ulid [options]
