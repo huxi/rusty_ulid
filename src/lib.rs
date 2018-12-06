@@ -316,7 +316,6 @@ impl Ulid {
             panic!("ULID does not support timestamps after +10889-08-02T05:31:50.655Z");
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)]
         let high = timestamp << 16 | u64::from(rng.gen::<u16>());
         let low = rng.gen::<u64>();
         let value = (high, low);
@@ -620,7 +619,7 @@ impl From<[u8; 16]> for Ulid {
     /// assert_eq!(ulid, expected_ulid);
     /// ```
     fn from(bytes: [u8; 16]) -> Self {
-        #[cfg_attr(rustfmt, rustfmt_skip)]
+        #[rustfmt::skip]
         let high = u64::from(bytes[0]) << 56
             | u64::from(bytes[1]) << 48
             | u64::from(bytes[2]) << 40
@@ -630,7 +629,7 @@ impl From<[u8; 16]> for Ulid {
             | u64::from(bytes[6]) << 8
             | u64::from(bytes[7]);
 
-        #[cfg_attr(rustfmt, rustfmt_skip)]
+        #[rustfmt::skip]
         let low = u64::from(bytes[8]) << 56
             | u64::from(bytes[9]) << 48
             | u64::from(bytes[10]) << 40
@@ -675,10 +674,10 @@ impl From<Ulid> for [u8; 16] {
     ///
     /// assert_eq!(bytes, expected_bytes);
     /// ```
+    #[rustfmt::skip]
     fn from(ulid: Ulid) -> Self {
         let value = ulid.value;
 
-        #[cfg_attr(rustfmt, rustfmt_skip)]
         [
             ((value.0 >> 56) & 0xff) as u8,
             ((value.0 >> 48) & 0xff) as u8,
@@ -1114,25 +1113,4 @@ mod tests {
 
         assert_eq!(ulid_value, 0x0000_0000_0000_F00F_0000_0000_0000_F00F);
     }
-
-    /*
-    #[test]
-    fn test_default() {
-        let ulid: Ulid = Default::default();
-    
-        println!("ulid: {}", ulid);
-    
-        let ulid_value: u128 = ulid.into();
-    
-        assert_ne!(ulid_value, 0x0000_0000_0000_0000_0000_0000_0000_0000);
-    
-        let ulid: Ulid = Default::default();
-    
-        println!("ulid: {}", ulid);
-    
-        let ulid_value: u128 = ulid.into();
-    
-        assert_ne!(ulid_value, 0x0000_0000_0000_0000_0000_0000_0000_0000);
-    }
-    */
 }

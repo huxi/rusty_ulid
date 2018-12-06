@@ -41,8 +41,7 @@
 use std::error::Error;
 use std::fmt;
 
-// #[rustfmt::skip] requires Rust 1.30 or later
-#[cfg_attr(rustfmt, rustfmt_skip)]
+#[rustfmt::skip]
 static ENCODING_DIGITS: [char; 32] = [
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K',
@@ -70,7 +69,7 @@ fn resolve_u128_value_for_char(c: char) -> Result<u128, DecodingError> {
     Err(DecodingError::InvalidChar(c))
 }
 
-#[cfg_attr(rustfmt, rustfmt_skip)]
+#[rustfmt::skip]
 static DECODING_DIGITS: [Option<u8>; 123] = [
     // 0
     None, None, None, None, None, None, None, None,
