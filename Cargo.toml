@@ -12,7 +12,7 @@ keywords = ["ulid", "uuid", "sortable", "identifier"]
 categories = ["data-structures","date-and-time","encoding","parsing","value-formatting"]
 
 [dependencies]
-rand = "0.6.0"
+rand = "0.6.1"
 chrono = "0.4.6"
 
 [dev-dependencies]
