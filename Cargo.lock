@@ -452,7 +452,7 @@ dependencies = [
 
 [[package]]
 name = "rusty_ulid"
-version = "0.6.1"
+version = "0.7.0"
 dependencies = [
  "chrono 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "criterion 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",

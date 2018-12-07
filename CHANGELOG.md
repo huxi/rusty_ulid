@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased][unreleased]
+
+## [0.7.0] - 2018-12-07
 ### Changed
 - edition = “2018”
 - rand 0.6.1
@@ -104,7 +106,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Everything. This was the initial release.
 
-[unreleased]: https://github.com/huxi/rusty_ulid/compare/0.6.1...HEAD
+[unreleased]: https://github.com/huxi/rusty_ulid/compare/0.7.0...HEAD
+[0.7.0]: https://github.com/huxi/rusty_ulid/compare/0.6.1...0.7.0
 [0.6.1]: https://github.com/huxi/rusty_ulid/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/huxi/rusty_ulid/compare/0.5.0...0.6.0
 [0.5.0]: https://github.com/huxi/rusty_ulid/compare/0.4.1...0.5.0
