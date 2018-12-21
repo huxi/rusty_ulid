@@ -555,7 +555,7 @@ impl Ulid {
 }
 
 impl fmt::Display for Ulid {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         write!(f, "{}", self.to_string())
     }
 }
@@ -1078,7 +1078,7 @@ mod tests {
         internal_parse_quickstart().unwrap();
     }
 
-    fn internal_parse_quickstart() -> Result<(), Box<std::error::Error>> {
+    fn internal_parse_quickstart() -> Result<(), Box<dyn std::error::Error>> {
         // Alternative way to parse a ULID string
         // This example assumes a function returning a Result.
         let ulid: Ulid = "01CAT3X5Y5G9A62FH1FA6T9GVR".parse()?;

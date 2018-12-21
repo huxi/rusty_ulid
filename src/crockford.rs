@@ -126,7 +126,7 @@ pub enum DecodingError {
 impl Error for DecodingError {}
 
 impl fmt::Display for DecodingError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         match *self {
             DecodingError::InvalidLength => write!(f, "invalid length"),
             DecodingError::InvalidChar(c) => write!(f, "invalid character '{}'", c),
