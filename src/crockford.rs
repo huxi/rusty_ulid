@@ -803,10 +803,10 @@ mod tests {
     }
 
     #[test]
-    fn decoding_error_causes() {
-        assert!(DecodingError::InvalidLength.cause().is_none());
-        assert!(DecodingError::InvalidChar('a').cause().is_none());
-        assert!(DecodingError::DataTypeOverflow.cause().is_none());
+    fn decoding_error_sources() {
+        assert!(DecodingError::InvalidLength.source().is_none());
+        assert!(DecodingError::InvalidChar('a').source().is_none());
+        assert!(DecodingError::DataTypeOverflow.source().is_none());
     }
 
     #[test]
