@@ -814,7 +814,7 @@ impl From<Ulid> for u128 {
 mod tests {
     use super::*;
 
-    const PAST_TIMESTAMP: u64 = 1481195424879;
+    const PAST_TIMESTAMP: u64 = 1_481_195_424_879;
     const PAST_TIMESTAMP_PART: &str = "01B3F2133F";
 
     const MAX_TIMESTAMP: u64 = 0xFFFF_FFFF_FFFF;
