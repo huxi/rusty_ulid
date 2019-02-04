@@ -980,7 +980,6 @@ mod tests {
 
         let ulid_one_low_other: Ulid = (0, 1).into();
 
-        assert!(ulid_one_low == ulid_one_low);
         assert_eq!(ulid_one_low.eq(&ulid_one_low), true);
         assert_eq!(ulid_one_low.cmp(&ulid_one_low), Ordering::Equal);
 
