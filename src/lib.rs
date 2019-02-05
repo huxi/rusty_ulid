@@ -552,6 +552,64 @@ impl Ulid {
 
         string
     }
+
+    /// Returns a ULID for the given slice of bytes or `DecodingError::InvalidLength`
+    /// if the slice does not contain exactly 16 bytes.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # fn main() -> Result<(), rusty_ulid::DecodingError> {
+    /// # // https://github.com/rust-lang/rust/issues/56260
+    /// use rusty_ulid::Ulid;
+    ///
+    /// let bytes: [u8; 16] = [
+    ///     0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
+    ///     0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xF0, 0x0F,
+    /// ];
+    ///
+    /// let ulid : Ulid = Ulid::from_slice(&bytes)?;
+    ///
+    /// let expected_ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
+    ///
+    /// assert_eq!(ulid, expected_ulid);
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// ```
+    /// use rusty_ulid::Ulid;
+    /// use rusty_ulid::DecodingError;
+    ///
+    /// let mut bytes: [u8; 17] = [0; 17];
+    /// let result = Ulid::from_slice(&bytes);
+    ///
+    /// assert_eq!(result, Err(DecodingError::InvalidLength))
+    /// ```
+    ///
+    /// ```
+    /// use rusty_ulid::Ulid;
+    /// use rusty_ulid::DecodingError;
+    ///
+    /// let mut bytes: [u8; 15] = [0; 15];
+    /// let result = Ulid::from_slice(&bytes);
+    ///
+    /// assert_eq!(result, Err(DecodingError::InvalidLength))
+    /// ```
+    pub fn from_slice(b: &[u8]) -> Result<Ulid, DecodingError> {
+        const BYTES_LEN: usize = 16;
+
+        let len = b.len();
+
+        if len != BYTES_LEN {
+            return Err(DecodingError::InvalidLength);
+        }
+
+        let mut bytes: [u8; 16] = [0; 16];
+        bytes.copy_from_slice(b);
+        Ok(bytes.into())
+    }
 }
 
 impl fmt::Display for Ulid {

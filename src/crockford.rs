@@ -110,7 +110,7 @@ static DECODING_DIGITS: [Option<u8>; 123] = [
 ///
 /// [crockford]: https://crockford.com/wrmg/base32.html
 pub enum DecodingError {
-    /// The length of the parsed string does not conform to requirements.
+    /// The length of the parsed string or given slice of bytes does not conform to requirements.
     InvalidLength,
 
     /// The parsed string contains a character that is not allowed in a
