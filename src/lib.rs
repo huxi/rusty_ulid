@@ -891,7 +891,7 @@ impl<'de> Deserialize<'de> for Ulid {
             impl<'vi> de::Visitor<'vi> for UlidStringVisitor {
                 type Value = Ulid;
 
-                fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                     write!(formatter, "a ULID string")
                 }
 
@@ -907,7 +907,7 @@ impl<'de> Deserialize<'de> for Ulid {
             impl<'vi> de::Visitor<'vi> for UlidBytesVisitor {
                 type Value = Ulid;
 
-                fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                     write!(formatter, "16 ULID bytes")
                 }
 
