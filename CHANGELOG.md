@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased][unreleased]
 ### Added
 - `Ulid::from_slice(&[u8])`
+- optional serde support
 
 ## [0.7.0] - 2018-12-07
 ### Changed

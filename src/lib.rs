@@ -153,6 +153,8 @@
 //! [crockford]: https://crockford.com/wrmg/base32.html
 
 use chrono::prelude::{DateTime, TimeZone, Utc};
+#[cfg(feature = "serde")]
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt;
 use std::str::FromStr;
 
@@ -868,6 +870,56 @@ impl From<Ulid> for u128 {
     }
 }
 
+#[cfg(feature = "serde")]
+impl Serialize for Ulid {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        if serializer.is_human_readable() {
+            serializer.serialize_str(&self.to_string())
+        } else {
+            let bytes: [u8; 16] = self.clone().into();
+            serializer.serialize_bytes(&bytes)
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for Ulid {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        if deserializer.is_human_readable() {
+            struct UlidStringVisitor;
+
+            impl<'vi> de::Visitor<'vi> for UlidStringVisitor {
+                type Value = Ulid;
+
+                fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    write!(formatter, "a ULID string")
+                }
+
+                fn visit_str<E: de::Error>(self, value: &str) -> Result<Ulid, E> {
+                    value.parse::<Ulid>().map_err(E::custom)
+                }
+            }
+
+            deserializer.deserialize_str(UlidStringVisitor)
+        } else {
+            struct UlidBytesVisitor;
+
+            impl<'vi> de::Visitor<'vi> for UlidBytesVisitor {
+                type Value = Ulid;
+
+                fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    write!(formatter, "16 ULID bytes")
+                }
+
+                fn visit_bytes<E: de::Error>(self, value: &[u8]) -> Result<Ulid, E> {
+                    Ulid::from_slice(value).map_err(E::custom)
+                }
+            }
+            deserializer.deserialize_bytes(UlidBytesVisitor)
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1163,5 +1215,51 @@ mod tests {
         let ulid_value: u128 = ulid.into();
 
         assert_eq!(ulid_value, 0x0000_0000_0000_F00F_0000_0000_0000_F00F);
+    }
+}
+
+#[cfg(all(test, feature = "serde"))]
+mod serde_tests {
+    use super::*;
+    use serde_test::*;
+
+    #[test]
+    fn test_serde_readable() {
+        use serde_test::Configure;
+
+        let ulid = Ulid::from_str("7ZZZZZZZZZZZZZZZZZZZZZZZZZ").unwrap();
+        assert_tokens(
+            &ulid.readable(),
+            &[Token::Str("7ZZZZZZZZZZZZZZZZZZZZZZZZZ")],
+        );
+
+        let ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
+        assert_tokens(
+            &ulid.readable(),
+            &[Token::Str("0H48SM8NB6EY49KANVSKEYXW0F")],
+        );
+    }
+
+    #[test]
+    fn test_serde_compact() {
+        use serde_test::Configure;
+
+        let ulid = Ulid::from_str("7ZZZZZZZZZZZZZZZZZZZZZZZZZ").unwrap();
+        assert_tokens(
+            &ulid.compact(),
+            &[Token::Bytes(&[
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF,
+            ])],
+        );
+
+        let ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
+        assert_tokens(
+            &ulid.compact(),
+            &[Token::Bytes(&[
+                0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE,
+                0xF0, 0x0F,
+            ])],
+        );
     }
 }
