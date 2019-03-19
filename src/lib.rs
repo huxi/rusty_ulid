@@ -1277,6 +1277,21 @@ mod serde_tests {
             &[Token::Str("0H48SM8NB6EY49KANUSKEYXW0F")],
             "invalid character 'U'",
         );
+
+        assert_de_tokens_error::<Readable<Ulid>>(
+            &[Token::Str("0H48SM8NB6EY49KANVSKEYXW0FF")],
+            "invalid length",
+        );
+
+        assert_de_tokens_error::<Readable<Ulid>>(
+            &[Token::Str("0H48SM8NB6EY49KANVSKEYXW0")],
+            "invalid length",
+        );
+
+        assert_de_tokens_error::<Readable<Ulid>>(
+            &[Token::Str("80000000000000000000000000")],
+            "data type overflow",
+        );
     }
 
     #[test]
