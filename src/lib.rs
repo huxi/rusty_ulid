@@ -1262,4 +1262,44 @@ mod serde_tests {
             ])],
         );
     }
+
+    #[test]
+    fn test_de_readable_error() {
+        assert_de_tokens_error::<Readable<Ulid>>(
+            &[Token::Bytes(&[
+                0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE,
+                0xF0, 0x0F,
+            ])],
+            "invalid type: byte array, expected a ULID string",
+        );
+
+        assert_de_tokens_error::<Readable<Ulid>>(
+            &[Token::Str("0H48SM8NB6EY49KANUSKEYXW0F")],
+            "invalid character 'U'",
+        );
+    }
+
+    #[test]
+    fn test_de_compact_error() {
+        assert_de_tokens_error::<Compact<Ulid>>(
+            &[Token::Str("0H48SM8NB6EY49KANVSKEYXW0F")],
+            "invalid type: string \"0H48SM8NB6EY49KANVSKEYXW0F\", expected 16 ULID bytes",
+        );
+
+        assert_de_tokens_error::<Compact<Ulid>>(
+            &[Token::Bytes(&[
+                0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE,
+                0xF0, 0x0F, 0xFF,
+            ])],
+            "invalid length",
+        );
+
+        assert_de_tokens_error::<Compact<Ulid>>(
+            &[Token::Bytes(&[
+                0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE,
+                0xF0,
+            ])],
+            "invalid length",
+        );
+    }
 }
