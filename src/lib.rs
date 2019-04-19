@@ -441,18 +441,14 @@ impl Ulid {
     /// # Examples
     ///
     /// ```
-    /// # fn main() -> Result<(), rusty_ulid::DecodingError> {
-    /// # // https://github.com/rust-lang/rust/issues/56260
     /// use rusty_ulid::Ulid;
     /// use std::str::FromStr;
     ///
-    /// let ulid = Ulid::from_str("01CAH7NXGRDJNE9B1NY7PQGYV7");
-    /// let timestamp = ulid?.timestamp();
+    /// let ulid = Ulid::from_str("01CAH7NXGRDJNE9B1NY7PQGYV7")?;
+    /// let timestamp = ulid.timestamp();
     ///
     /// assert_eq!(timestamp, 1523144390168);
-    /// #
-    /// #     Ok(())
-    /// # }
+    /// # Ok::<(), rusty_ulid::DecodingError>(())
     /// ```
     pub fn timestamp(&self) -> u64 {
         (self.value.0 >> 16) as u64
@@ -463,18 +459,14 @@ impl Ulid {
     /// # Examples
     ///
     /// ```
-    /// # fn main() -> Result<(), rusty_ulid::DecodingError> {
-    /// # // https://github.com/rust-lang/rust/issues/56260
     /// use rusty_ulid::Ulid;
     /// use std::str::FromStr;
     ///
-    /// let ulid = Ulid::from_str("01CAH7NXGRDJNE9B1NY7PQGYV7");
-    /// let datetime = ulid?.datetime();
+    /// let ulid = Ulid::from_str("01CAH7NXGRDJNE9B1NY7PQGYV7")?;
+    /// let datetime = ulid.datetime();
     ///
     /// assert_eq!(datetime.to_string(), "2018-04-07 23:39:50.168 UTC");
-    /// #
-    /// #     Ok(())
-    /// # }
+    /// # Ok::<(), rusty_ulid::DecodingError>(())
     /// ```
     pub fn datetime(&self) -> DateTime<Utc> {
         let timestamp = self.timestamp();

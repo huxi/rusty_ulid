@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT)
- * Copyright (c) 2018 Joern Huxhorn
+ * Copyright (c) 2018-2019 Joern Huxhorn
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the “Software”), to deal
@@ -22,7 +22,7 @@
  */
 
 /*
- * Copyright 2018 Joern Huxhorn
+ * Copyright 2018-2019 Joern Huxhorn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -216,19 +216,15 @@ pub fn append_crockford_u128(value: u128, to_append_to: &mut String) {
 /// `i` and `l` will be treated as `1` and `o` will be treated as `0`.
 ///
 /// ```
-/// # fn main() -> Result<(), rusty_ulid::DecodingError> {
-/// # // https://github.com/rust-lang/rust/issues/56260
 /// use rusty_ulid::crockford::*;
 ///
-/// let parsed = parse_crockford_u128("00000000000000000x1iIlLoO0");
+/// let parsed = parse_crockford_u128("00000000000000000x1iIlLoO0")?;
 ///
 /// let mut string_representation = String::new();
-/// append_crockford_u128(parsed?, &mut string_representation);
+/// append_crockford_u128(parsed, &mut string_representation);
 ///
 /// assert_eq!(string_representation, "00000000000000000X11111000");
-/// #
-/// #     Ok(())
-/// # }
+/// # Ok::<(), rusty_ulid::DecodingError>(())
 /// ```
 ///
 /// # Errors
@@ -407,19 +403,15 @@ pub fn append_crockford_u64_tuple(value: (u64, u64), to_append_to: &mut String) 
 /// `i` and `l` will be treated as `1` and `o` will be treated as `0`.
 ///
 /// ```
-/// # fn main() -> Result<(), rusty_ulid::DecodingError> {
-/// # // https://github.com/rust-lang/rust/issues/56260
 /// use rusty_ulid::crockford::*;
 ///
-/// let parsed = parse_crockford_u64_tuple("00000000000000000x1iIlLoO0");
+/// let parsed = parse_crockford_u64_tuple("00000000000000000x1iIlLoO0")?;
 ///
 /// let mut string_representation = String::new();
-/// append_crockford_u64_tuple(parsed?, &mut string_representation);
+/// append_crockford_u64_tuple(parsed, &mut string_representation);
 ///
 /// assert_eq!(string_representation, "00000000000000000X11111000");
-/// #
-/// #     Ok(())
-/// # }
+/// # Ok::<(), rusty_ulid::DecodingError>(())
 /// ```
 ///
 /// # Errors
