@@ -8,7 +8,7 @@
 
 This is a Rust implementation of the [ULID][ulid] Universally Unique Lexicographically Sortable Identifiers.
 
-This crate requires **Rust 1.31 or later**.
+This crate requires **Rust 1.34 or later**.
 
 Take a look at the [changelog][changelog] for a detailed list of all changes.
 
@@ -36,6 +36,7 @@ assert_eq!(ulid_bytes.len(), 16);
 ```
 
 ```rust
+use std::str::FromStr;
 use rusty_ulid::Ulid;
 
 // Generate a ULID
@@ -59,6 +60,7 @@ let ulid: Ulid = "01CAT3X5Y5G9A62FH1FA6T9GVR".parse()?;
 
 let datetime = ulid.datetime();
 assert_eq!(datetime.to_string(), "2018-04-11 10:27:03.749 UTC");
+# Ok::<(), rusty_ulid::DecodingError>(())
 ```
 
 Monotonic ULIDs are supported via `Ulid::next_monotonic(previous_ulid) -> Ulid` and

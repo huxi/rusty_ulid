@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT)
- * Copyright (c) 2018 Joern Huxhorn
+ * Copyright (c) 2018-2019 Joern Huxhorn
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the “Software”), to deal
@@ -22,7 +22,7 @@
  */
 
 /*
- * Copyright 2018 Joern Huxhorn
+ * Copyright 2018-2019 Joern Huxhorn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1158,47 +1158,6 @@ mod tests {
     }
 
     #[test]
-    fn fn_quickstart() {
-        // Generate a ULID string
-        let ulid_string: String = generate_ulid_string();
-        assert_eq!(ulid_string.len(), 26);
-
-        // Generate ULID bytes
-        let ulid_bytes: [u8; 16] = generate_ulid_bytes();
-        assert_eq!(ulid_bytes.len(), 16);
-    }
-
-    #[test]
-    fn quickstart() {
-        // Generate a ULID
-        let ulid = Ulid::generate();
-
-        // Generate a string for a ULID
-        let ulid_string = ulid.to_string();
-
-        // Create ULID from a string
-        let result = Ulid::from_str(&ulid_string);
-
-        assert_eq!(Ok(ulid), result);
-    }
-
-    #[test]
-    fn parse_quickstart() {
-        internal_parse_quickstart().unwrap();
-    }
-
-    fn internal_parse_quickstart() -> Result<(), Box<dyn std::error::Error>> {
-        // Alternative way to parse a ULID string
-        // This example assumes a function returning a Result.
-        let ulid: Ulid = "01CAT3X5Y5G9A62FH1FA6T9GVR".parse()?;
-
-        let datetime = ulid.datetime();
-        assert_eq!(datetime.to_string(), "2018-04-11 10:27:03.749 UTC");
-
-        Ok(())
-    }
-
-    #[test]
     fn test_from_timestamp_with_rng() {
         use rand::rngs::mock::StepRng;
 
@@ -1217,6 +1176,9 @@ mod tests {
         assert_eq!(ulid_value, 0x0000_0000_0000_F00F_0000_0000_0000_F00F);
     }
 }
+
+use doc_comment::doctest;
+doctest!("../README.md", readme);
 
 #[cfg(all(test, feature = "serde"))]
 mod serde_tests {

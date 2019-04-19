@@ -21,6 +21,7 @@ default = ["serde"]
 rand = "0.6"
 chrono = "0.4"
 serde = {version ="1", optional = true}
+doc-comment = "0.3"
 
 [dev-dependencies]
 criterion = "0.2"
