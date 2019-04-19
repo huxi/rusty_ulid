@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased][unreleased]
 ### Added
 - checks for code in `README.md`
+- `impl TryFrom<&[u8]> for Ulid`
+
+### Removed
+- `Ulid::from_slice(&[u8])` in favor of `impl TryFrom<&[u8]> for Ulid`
+
 
 ## [0.8.0] - 2019-03-18
 ### Added

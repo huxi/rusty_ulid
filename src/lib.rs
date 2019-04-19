@@ -153,10 +153,13 @@
 //! [crockford]: https://crockford.com/wrmg/base32.html
 
 use chrono::prelude::{DateTime, TimeZone, Utc};
-#[cfg(feature = "serde")]
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+
+use std::convert::TryFrom;
 use std::fmt;
 use std::str::FromStr;
+
+#[cfg(feature = "serde")]
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 
 /// Contains functions for encoding and decoding of
 /// [crockford Base32][crockford] strings.
@@ -554,64 +557,6 @@ impl Ulid {
 
         string
     }
-
-    /// Returns a ULID for the given slice of bytes or `DecodingError::InvalidLength`
-    /// if the slice does not contain exactly 16 bytes.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # fn main() -> Result<(), rusty_ulid::DecodingError> {
-    /// # // https://github.com/rust-lang/rust/issues/56260
-    /// use rusty_ulid::Ulid;
-    ///
-    /// let bytes: [u8; 16] = [
-    ///     0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
-    ///     0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xF0, 0x0F,
-    /// ];
-    ///
-    /// let ulid : Ulid = Ulid::from_slice(&bytes)?;
-    ///
-    /// let expected_ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
-    ///
-    /// assert_eq!(ulid, expected_ulid);
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
-    ///
-    /// ```
-    /// use rusty_ulid::Ulid;
-    /// use rusty_ulid::DecodingError;
-    ///
-    /// let mut bytes: [u8; 17] = [0; 17];
-    /// let result = Ulid::from_slice(&bytes);
-    ///
-    /// assert_eq!(result, Err(DecodingError::InvalidLength))
-    /// ```
-    ///
-    /// ```
-    /// use rusty_ulid::Ulid;
-    /// use rusty_ulid::DecodingError;
-    ///
-    /// let mut bytes: [u8; 15] = [0; 15];
-    /// let result = Ulid::from_slice(&bytes);
-    ///
-    /// assert_eq!(result, Err(DecodingError::InvalidLength))
-    /// ```
-    pub fn from_slice(b: &[u8]) -> Result<Ulid, DecodingError> {
-        const BYTES_LEN: usize = 16;
-
-        let len = b.len();
-
-        if len != BYTES_LEN {
-            return Err(DecodingError::InvalidLength);
-        }
-
-        let mut bytes: [u8; 16] = [0; 16];
-        bytes.copy_from_slice(b);
-        Ok(bytes.into())
-    }
 }
 
 impl fmt::Display for Ulid {
@@ -870,6 +815,91 @@ impl From<Ulid> for u128 {
     }
 }
 
+impl TryFrom<&[u8]> for Ulid {
+    type Error = DecodingError;
+
+    /// Returns a ULID for the given slice of bytes or `DecodingError::InvalidLength`
+    /// if the slice does not contain exactly 16 bytes.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rusty_ulid::Ulid;
+    /// use std::convert::TryFrom;
+    /// use std::convert::TryInto;
+    ///
+    /// let bytes: [u8; 18] = [
+    ///     0x00,
+    ///     0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
+    ///     0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xF0, 0x0F,
+    ///     0x00,
+    /// ];
+    ///
+    /// let ulid : Ulid = Ulid::try_from(&bytes[1..17])?;
+    ///
+    /// let expected_ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
+    ///
+    /// assert_eq!(ulid, expected_ulid);
+    ///
+    /// let ulid : Ulid = (&bytes[1..17]).try_into()?;
+    ///
+    /// let expected_ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
+    ///
+    /// assert_eq!(ulid, expected_ulid);
+    /// # Ok::<(), rusty_ulid::DecodingError>(())
+    /// ```
+    ///
+    /// ```
+    /// use rusty_ulid::Ulid;
+    /// use rusty_ulid::DecodingError;
+    /// use std::convert::TryFrom;
+    ///
+    /// let mut bytes: [u8; 17] = [0; 17];
+    /// let result = Ulid::try_from(&bytes[0..]);
+    ///
+    /// assert_eq!(result, Err(DecodingError::InvalidLength))
+    /// ```
+    ///
+    /// ```
+    /// use rusty_ulid::Ulid;
+    /// use rusty_ulid::DecodingError;
+    /// use std::convert::TryFrom;
+    ///
+    /// let mut bytes: [u8; 15] = [0; 15];
+    /// let result = Ulid::try_from(&bytes[0..]);
+    ///
+    /// assert_eq!(result, Err(DecodingError::InvalidLength))
+    /// ```
+    fn try_from(bytes: &[u8]) -> Result<Ulid, DecodingError> {
+        if bytes.len() != 16 {
+            return Err(DecodingError::InvalidLength);
+        }
+
+        #[rustfmt::skip]
+        let high = u64::from(bytes[0]) << 56
+            | u64::from(bytes[1]) << 48
+            | u64::from(bytes[2]) << 40
+            | u64::from(bytes[3]) << 32
+            | u64::from(bytes[4]) << 24
+            | u64::from(bytes[5]) << 16
+            | u64::from(bytes[6]) << 8
+            | u64::from(bytes[7]);
+
+        #[rustfmt::skip]
+        let low = u64::from(bytes[8]) << 56
+            | u64::from(bytes[9]) << 48
+            | u64::from(bytes[10]) << 40
+            | u64::from(bytes[11]) << 32
+            | u64::from(bytes[12]) << 24
+            | u64::from(bytes[13]) << 16
+            | u64::from(bytes[14]) << 8
+            | u64::from(bytes[15]);
+
+        let value = (high, low);
+        Ok(Ulid { value })
+    }
+}
+
 #[cfg(feature = "serde")]
 impl Serialize for Ulid {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
@@ -912,7 +942,7 @@ impl<'de> Deserialize<'de> for Ulid {
                 }
 
                 fn visit_bytes<E: de::Error>(self, value: &[u8]) -> Result<Ulid, E> {
-                    Ulid::from_slice(value).map_err(E::custom)
+                    Ulid::try_from(value).map_err(E::custom)
                 }
             }
             deserializer.deserialize_bytes(UlidBytesVisitor)
