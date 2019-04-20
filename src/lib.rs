@@ -1173,10 +1173,15 @@ mod tests {
         assert_ne!(hash_one_low, hash_one_high);
     }
 
+    #[cfg(not(miri))] // expected panic
     #[test]
     #[should_panic(expected = "ULID does not support timestamps after +10889-08-02T05:31:50.655Z")]
     fn y10889_bug() {
-        Ulid::from_timestamp_with_rng(0x0001_0000_0000_0000, &mut rand::thread_rng());
+        use rand::rngs::mock::StepRng;
+
+        let mut mock_rng = StepRng::new(0, 0);
+        Ulid::from_timestamp_with_rng(0x0001_0000_0000_0000, &mut mock_rng);
+        unreachable!();
     }
 
     #[test]

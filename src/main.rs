@@ -161,6 +161,7 @@ mod tests {
         assert_eq!(result, 0);
     }
 
+    #[cfg(not(miri))] // libc::gettimeofday
     #[test]
     fn no_args_return_no_error() {
         let args = vec![];
@@ -169,6 +170,7 @@ mod tests {
         assert_eq!(result, 0);
     }
 
+    #[cfg(not(miri))] // libc::gettimeofday
     #[test]
     fn verbose_short_returns_no_error() {
         let args = vec!["-v".to_string()];
@@ -177,6 +179,7 @@ mod tests {
         assert_eq!(result, 0);
     }
 
+    #[cfg(not(miri))] // libc::gettimeofday
     #[test]
     fn verbose_long_returns_no_error() {
         let args = vec!["--verbose".to_string()];

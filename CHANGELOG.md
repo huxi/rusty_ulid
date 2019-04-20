@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - checks for code in `README.md`
 - `impl TryFrom<&[u8]> for Ulid`
+- [Miri](https://github.com/rust-lang/miri/) support
 
 ### Removed
 - `Ulid::from_slice(&[u8])` in favor of `impl TryFrom<&[u8]> for Ulid`
