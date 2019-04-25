@@ -67,6 +67,33 @@ fn main() {
     std::process::exit(exit_code);
 }
 
+#[cfg(all(feature = "rand", feature = "chrono"))]
+fn generate_ulid(verbose: bool) -> i32 {
+    let ulid = Ulid::generate();
+    println!("{}", ulid);
+    if verbose {
+        println!("{}", ulid.datetime());
+    }
+
+    0
+}
+
+#[cfg(not(all(feature = "rand", feature = "chrono")))]
+fn generate_ulid(_verbose: bool) -> i32 {
+    println!("Generation of ULID not supported.");
+    1
+}
+
+#[cfg(feature = "chrono")]
+fn print_verbose(ulid: &Ulid) {
+    println!("{}\n{}\n", ulid, ulid.datetime());
+}
+
+#[cfg(not(feature = "chrono"))]
+fn print_verbose(ulid: &Ulid) {
+    println!("{}\n", ulid);
+}
+
 fn main_with_args_and_return_value(args: Vec<String>) -> i32 {
     let mut verbose: bool = false;
     let mut help: bool = false;
@@ -98,12 +125,7 @@ fn main_with_args_and_return_value(args: Vec<String>) -> i32 {
 
     if ulid_candidates.is_empty() {
         // not checking, producing
-        let ulid = Ulid::generate();
-        println!("{}", ulid);
-        if verbose {
-            println!("{}", ulid.datetime());
-        }
-        return 0;
+        return generate_ulid(verbose);
     }
 
     let mut broken = Vec::<String>::new();
@@ -111,7 +133,7 @@ fn main_with_args_and_return_value(args: Vec<String>) -> i32 {
         let result = Ulid::from_str(&candidate);
         if let Ok(ulid) = result {
             if verbose {
-                println!("{}\n{}\n", ulid, ulid.datetime());
+                print_verbose(&ulid);
             }
         } else {
             broken.push(candidate);
@@ -162,6 +184,7 @@ mod tests {
     }
 
     #[cfg(not(miri))] // libc::gettimeofday
+    #[cfg(all(feature = "rand", feature = "chrono"))]
     #[test]
     fn no_args_return_no_error() {
         let args = vec![];
@@ -171,6 +194,7 @@ mod tests {
     }
 
     #[cfg(not(miri))] // libc::gettimeofday
+    #[cfg(all(feature = "rand", feature = "chrono"))]
     #[test]
     fn verbose_short_returns_no_error() {
         let args = vec!["-v".to_string()];
@@ -180,12 +204,40 @@ mod tests {
     }
 
     #[cfg(not(miri))] // libc::gettimeofday
+    #[cfg(all(feature = "rand", feature = "chrono"))]
     #[test]
     fn verbose_long_returns_no_error() {
         let args = vec!["--verbose".to_string()];
 
         let result = main_with_args_and_return_value(args);
         assert_eq!(result, 0);
+    }
+
+    #[cfg(not(all(feature = "rand", feature = "chrono")))]
+    #[test]
+    fn no_args_return_no_error() {
+        let args = vec![];
+
+        let result = main_with_args_and_return_value(args);
+        assert_eq!(result, 1);
+    }
+
+    #[cfg(not(all(feature = "rand", feature = "chrono")))]
+    #[test]
+    fn verbose_short_returns_no_error() {
+        let args = vec!["-v".to_string()];
+
+        let result = main_with_args_and_return_value(args);
+        assert_eq!(result, 1);
+    }
+
+    #[cfg(not(all(feature = "rand", feature = "chrono")))]
+    #[test]
+    fn verbose_long_returns_no_error() {
+        let args = vec!["--verbose".to_string()];
+
+        let result = main_with_args_and_return_value(args);
+        assert_eq!(result, 1);
     }
 
     #[test]

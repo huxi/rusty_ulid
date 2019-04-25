@@ -15,13 +15,14 @@ categories = ["data-structures","date-and-time","encoding","parsing","value-form
 [features]
 # The default set of optional packages. Most people will want to use these
 # packages, but they are strictly optional.
-default = ["serde"]
+default = ["ulid-generation", "serde", "doc-comment"]
+ulid-generation = ["chrono", "rand"]
 
 [dependencies]
-rand = "0.6"
-chrono = "0.4"
-serde = {version ="1", optional = true}
-doc-comment = "0.3"
+rand = { version = "0.6", optional = true }
+chrono = { version = "0.4", optional = true }
+serde = { version = "1", optional = true }
+doc-comment = { version = "0.3", optional = true }
 
 [dev-dependencies]
 criterion = "0.2"

@@ -7,9 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased][unreleased]
 ### Added
-- checks for code in `README.md`
+- test code in `README.md` using [doc-comment](https://crates.io/crates/doc-comment)
 - `impl TryFrom<&[u8]> for Ulid`
 - [Miri](https://github.com/rust-lang/miri/) support
+
+### Changed
+- all dependencies are now optional but enabled by default
 
 ### Removed
 - `Ulid::from_slice(&[u8])` in favor of `impl TryFrom<&[u8]> for Ulid`

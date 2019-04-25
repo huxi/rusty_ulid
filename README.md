@@ -16,9 +16,11 @@ Take a look at the [changelog][changelog] for a detailed list of all changes.
 - lenient parsing of ULID strings as specified in [Crockford Base32 Encoding][crockford].
 - straight-forward creation of string and binary ULIDs.
 - optional support for monotonic ULIDs.
+- conversion from `&[u8]`.
 - conversion to and from `[u8; 16]`.
 - conversion to and from `(u64, u64)`.
 - conversion to and from `u128`.
+- [serde](https://crates.io/crates/serde) support for both human-readable and binary encoding.
 
 ## Quickstart
 
@@ -75,7 +77,7 @@ Run the benchmarks by executing `cargo bench`.
 
 ## Executable
 
-Install the executable by executing `cargo install` or `cargo install --force` if a prior version was already installed.
+Install the executable by executing `cargo install --path .` or `cargo install --path . --force` if a prior version was already installed.
 
 ### `rusty_ulid` usage examples
 

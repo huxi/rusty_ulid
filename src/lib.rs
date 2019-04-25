@@ -152,6 +152,7 @@
 //! [ulidspec]: https://github.com/ulid/spec
 //! [crockford]: https://crockford.com/wrmg/base32.html
 
+#[cfg(feature = "chrono")]
 use chrono::prelude::{DateTime, TimeZone, Utc};
 
 use std::convert::TryFrom;
@@ -170,6 +171,7 @@ pub use crate::crockford::DecodingError;
 
 /// Returns the number of non-leap milliseconds since January 1, 1970 0:00:00 UTC
 /// (aka "UNIX timestamp").
+#[cfg(all(feature = "rand", feature = "chrono"))]
 fn unix_epoch_ms() -> u64 {
     let now: DateTime<Utc> = Utc::now();
 
@@ -188,6 +190,7 @@ fn unix_epoch_ms() -> u64 {
 /// // every ulid has exactly 26 characters
 /// assert_eq!(ulid_string.len(), 26);
 /// ```
+#[cfg(all(feature = "rand", feature = "chrono"))]
 pub fn generate_ulid_string() -> String {
     Ulid::generate().to_string()
 }
@@ -204,6 +207,7 @@ pub fn generate_ulid_string() -> String {
 /// // a binary ulid has exactly 16 bytes
 /// assert_eq!(ulid_bytes.len(), 16);
 /// ```
+#[cfg(all(feature = "rand", feature = "chrono"))]
 pub fn generate_ulid_bytes() -> [u8; 16] {
     Ulid::generate().into()
 }
@@ -234,6 +238,7 @@ impl Ulid {
     /// # Panics
     ///
     /// Panics if called after `+10889-08-02T05:31:50.655Z`.
+    #[cfg(all(feature = "rand", feature = "chrono"))]
     pub fn generate() -> Ulid {
         Ulid::from_timestamp_with_rng(unix_epoch_ms(), &mut rand::thread_rng())
     }
@@ -257,6 +262,7 @@ impl Ulid {
     /// # Panics
     ///
     /// Panics if called after `+10889-08-02T05:31:50.655Z`.
+    #[cfg(all(feature = "rand", feature = "chrono"))]
     pub fn next_monotonic(previous_ulid: Ulid) -> Ulid {
         Ulid::next_monotonic_from_timestamp_with_rng(
             previous_ulid,
@@ -285,6 +291,7 @@ impl Ulid {
     /// # Panics
     ///
     /// Panics if called after `+10889-08-02T05:31:50.655Z`.
+    #[cfg(all(feature = "rand", feature = "chrono"))]
     pub fn next_strictly_monotonic(previous_ulid: Ulid) -> Option<Ulid> {
         Ulid::next_strictly_monotonic_from_timestamp_with_rng(
             previous_ulid,
@@ -311,6 +318,7 @@ impl Ulid {
     /// # Panics
     ///
     /// Panics if `timestamp` is larger than `0xFFFF_FFFF_FFFF`.
+    #[cfg(feature = "rand")]
     pub fn from_timestamp_with_rng<R>(timestamp: u64, rng: &mut R) -> Ulid
     where
         R: rand::Rng,
@@ -365,6 +373,7 @@ impl Ulid {
     /// # Panics
     ///
     /// Panics if `timestamp` is larger than `0xFFFF_FFFF_FFFF`.
+    #[cfg(feature = "rand")]
     pub fn next_monotonic_from_timestamp_with_rng<R>(
         previous_ulid: Ulid,
         timestamp: u64,
@@ -418,6 +427,7 @@ impl Ulid {
     /// # Panics
     ///
     /// Panics if `timestamp` is larger than `0xFFFF_FFFF_FFFF`.
+    #[cfg(feature = "rand")]
     pub fn next_strictly_monotonic_from_timestamp_with_rng<R>(
         previous_ulid: Ulid,
         timestamp: u64,
@@ -468,6 +478,7 @@ impl Ulid {
     /// assert_eq!(datetime.to_string(), "2018-04-07 23:39:50.168 UTC");
     /// # Ok::<(), rusty_ulid::DecodingError>(())
     /// ```
+    #[cfg(feature = "chrono")]
     pub fn datetime(&self) -> DateTime<Utc> {
         let timestamp = self.timestamp();
         let seconds: i64 = (timestamp / 1000) as i64;
@@ -978,7 +989,7 @@ mod tests {
         let incremented = input_value.increment();
 
         assert_eq!(incremented, expected_result);
-        assert_eq!(input_value.datetime(), incremented.datetime());
+        assert_eq!(input_value.timestamp(), incremented.timestamp());
     }
 
     #[test]
@@ -1174,6 +1185,7 @@ mod tests {
     }
 
     #[cfg(not(miri))] // expected panic
+    #[cfg(feature = "rand")]
     #[test]
     #[should_panic(expected = "ULID does not support timestamps after +10889-08-02T05:31:50.655Z")]
     fn y10889_bug() {
@@ -1181,9 +1193,9 @@ mod tests {
 
         let mut mock_rng = StepRng::new(0, 0);
         Ulid::from_timestamp_with_rng(0x0001_0000_0000_0000, &mut mock_rng);
-        unreachable!();
     }
 
+    #[cfg(feature = "rand")]
     #[test]
     fn test_from_timestamp_with_rng() {
         use rand::rngs::mock::StepRng;
@@ -1204,8 +1216,11 @@ mod tests {
     }
 }
 
-use doc_comment::doctest;
-doctest!("../README.md", readme);
+#[cfg(all(feature = "doc-comment", feature = "rand", feature = "chrono"))]
+mod doc_tests {
+    use doc_comment::doctest;
+    doctest!("../README.md", readme);
+}
 
 #[cfg(all(test, feature = "serde"))]
 mod serde_tests {
