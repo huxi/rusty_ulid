@@ -151,6 +151,7 @@ dependencies = [
 name = "rusty_ulid-fuzz"
 version = "0.0.1"
 dependencies = [
+ "arbitrary 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "libfuzzer-sys 0.1.0 (git+https://github.com/rust-fuzz/libfuzzer-sys.git)",
  "rusty_ulid 0.9.0",
 ]

@@ -13,6 +13,9 @@ cargo-fuzz = true
 path = ".."
 [dependencies.libfuzzer-sys]
 git = "https://github.com/rust-fuzz/libfuzzer-sys.git"
+[dependencies.arbitrary]
+# breaks with 0.2
+version = "0.1"
 
 # Prevent this from interfering with workspaces
 [workspace]
@@ -23,6 +26,9 @@ name = "fuzz_from_str"
 path = "fuzz_targets/fuzz_from_str.rs"
 
 [[bin]]
-name = "fuzz_from_bytes"
-path = "fuzz_targets/fuzz_from_bytes.rs"
+name = "fuzz_from_byte_slice"
+path = "fuzz_targets/fuzz_from_byte_slice.rs"
 
+[[bin]]
+name = "fuzz_from_byte_array"
+path = "fuzz_targets/fuzz_from_byte_array.rs"
