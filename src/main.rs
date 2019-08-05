@@ -39,6 +39,7 @@
 
 #![deny(warnings, missing_docs)]
 #![allow(dead_code)]
+#![forbid(unsafe_code)]
 
 //! # Command line tool for generating and validating ULIDs
 

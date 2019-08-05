@@ -37,6 +37,8 @@
  * limitations under the License.
  */
 
+#![forbid(unsafe_code)]
+
 use criterion::{criterion_group, criterion_main, Criterion};
 
 use rusty_ulid::*;
