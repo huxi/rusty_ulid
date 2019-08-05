@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased][unreleased]
 ### Added
 - [Rust Safety Dance](https://github.com/rust-secure-code/safety-dance) link
+- fuzzing
 
 ### Changed
 - rand 0.7
