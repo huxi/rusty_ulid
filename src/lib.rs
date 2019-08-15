@@ -554,6 +554,9 @@ impl Ulid {
     ///
     /// assert_eq!(ulid.to_string(), "7ZZZZZZZZZZZZZZZZZZZZZZZZZ");
     /// ```
+    #[allow(clippy::unknown_clippy_lints)]
+    #[allow(clippy::inherent_to_string_shadow_display)]
+    // impl fmt::Display is using this method
     pub fn to_string(&self) -> String {
         let mut string = String::with_capacity(26);
 
