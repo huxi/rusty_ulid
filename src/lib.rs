@@ -557,6 +557,7 @@ impl Ulid {
     #[allow(clippy::unknown_clippy_lints)]
     #[allow(clippy::inherent_to_string_shadow_display)]
     // impl fmt::Display is using this method
+    // https://github.com/rust-lang/rust-clippy/issues/4396
     pub fn to_string(&self) -> String {
         let mut string = String::with_capacity(26);
 
