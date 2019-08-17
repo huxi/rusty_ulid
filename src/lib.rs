@@ -37,7 +37,7 @@
  * limitations under the License.
  */
 
-#![doc(html_root_url = "https://docs.rs/rusty_ulid/0.9.0")]
+#![doc(html_root_url = "https://docs.rs/rusty_ulid/0.9.1")]
 #![deny(warnings, missing_docs)]
 #![forbid(unsafe_code)]
 

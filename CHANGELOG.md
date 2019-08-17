@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased][unreleased]
+
+## [0.9.1] - 2019-08-17
 ### Added
 - [Rust Safety Dance](https://github.com/rust-secure-code/safety-dance) link
 - fuzzing
@@ -131,7 +133,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Everything. This was the initial release.
 
-[unreleased]: https://github.com/huxi/rusty_ulid/compare/0.9.0...HEAD
+[unreleased]: https://github.com/huxi/rusty_ulid/compare/0.9.1...HEAD
+[0.9.1]: https://github.com/huxi/rusty_ulid/compare/0.9.0...0.9.1
 [0.9.0]: https://github.com/huxi/rusty_ulid/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/huxi/rusty_ulid/compare/0.7.0...0.8.0
 [0.7.0]: https://github.com/huxi/rusty_ulid/compare/0.6.1...0.7.0
