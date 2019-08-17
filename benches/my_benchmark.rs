@@ -49,16 +49,33 @@ fn criterion_benchmark(c: &mut Criterion) {
     c.bench_function("generate_ulid_string", |b| {
         b.iter(|| generate_ulid_string())
     });
+
+    c.bench_function("generate_ulid_string_formatter", |b| {
+        b.iter(|| {
+            use std::fmt::Write;
+            let value = Ulid::generate();
+            let mut string = String::with_capacity(26);
+            string
+                .write_fmt(format_args!("{}", value))
+                .expect("a Display implementation returned an error unexpectedly");
+            string
+        })
+    });
+
     c.bench_function("generate_ulid_bytes", |b| b.iter(|| generate_ulid_bytes()));
+
     c.bench_function("from_str", |b| {
         b.iter(|| Ulid::from_str("01CAH7NXGRDJNE9B1NY7PQGYV7"))
     });
+
     c.bench_function("parse_crockford_u128", |b| {
         b.iter(|| crockford::parse_crockford_u128("01CAH7NXGRDJNE9B1NY7PQGYV7"))
     });
+
     c.bench_function("parse_crockford_u64_tuple", |b| {
         b.iter(|| crockford::parse_crockford_u64_tuple("01CAH7NXGRDJNE9B1NY7PQGYV7"))
     });
+
     c.bench_function("append_crockford_u128", |b| {
         b.iter(|| {
             let mut string = String::with_capacity(26);
