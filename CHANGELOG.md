@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - rand 0.7
+- minor `Display` performance improvement
 
 ## [0.9.0] - 2019-04-25
 ### Added

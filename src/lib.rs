@@ -568,7 +568,7 @@ impl Ulid {
 
 impl fmt::Display for Ulid {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        write!(f, "{}", self.to_string())
+        f.write_str(&self.to_string())
     }
 }
 
