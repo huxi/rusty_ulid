@@ -62,6 +62,13 @@ fn criterion_benchmark(c: &mut Criterion) {
         })
     });
 
+    c.bench_function("generate_ulid_string_tostring_trait", |b| {
+        b.iter(|| {
+            let value = Ulid::generate();
+            ToString::to_string(&value)
+        })
+    });
+
     c.bench_function("generate_ulid_bytes", |b| b.iter(|| generate_ulid_bytes()));
 
     c.bench_function("from_str", |b| {
