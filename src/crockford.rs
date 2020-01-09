@@ -801,22 +801,6 @@ mod tests {
         assert!(DecodingError::DataTypeOverflow.source().is_none());
     }
 
-    #[test]
-    fn description_returns_deprecation_message() {
-        assert_eq!(
-            "description() is deprecated; use Display",
-            DecodingError::InvalidLength.description()
-        );
-        assert_eq!(
-            "description() is deprecated; use Display",
-            DecodingError::InvalidChar('a').description()
-        );
-        assert_eq!(
-            "description() is deprecated; use Display",
-            DecodingError::DataTypeOverflow.description()
-        );
-    }
-
     fn single_append_crockford_u128(value: u128, expected_result: &str) {
         let mut a_string = String::new();
         append_crockford_u128(value, &mut a_string);

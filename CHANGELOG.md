@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased][unreleased]
 ### Changed
 - criterion 0.3
+- cargo update
+
+### Removed
+- test of deprecated function result to fix build on 1.42-nightly
 
 ## [0.9.1] - 2019-08-17
 ### Added
