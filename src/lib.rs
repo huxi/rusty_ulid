@@ -646,7 +646,7 @@ impl From<Ulid> for [u8; 16] {
     ///
     /// ```
     /// use rusty_ulid::Ulid;
-    /// 
+    ///
     /// let ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
     ///
     /// let bytes = <[u8; 16]>::from(ulid);
@@ -661,7 +661,7 @@ impl From<Ulid> for [u8; 16] {
     ///
     /// ```
     /// use rusty_ulid::Ulid;
-    /// 
+    ///
     /// let ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
     ///
     /// let bytes: [u8; 16] = ulid.into();
