@@ -7,9 +7,11 @@ rust:
   - beta
   - nightly
 
-matrix:
-  include:
-  - env: RUSTFLAGS="-D warnings"
+env:
+  global:
+    - RUSTFLAGS: "-D warnings"
+
+jobs:
   allow_failures:
     - rust: nightly
 
