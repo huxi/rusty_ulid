@@ -196,6 +196,9 @@ pub fn generate_ulid_string() -> String {
     Ulid::generate().to_string()
 }
 
+/// This shall fail the Travis build because of a warning.
+fn fail_travis_build() {}
+
 /// Returns new ULID bytes.
 ///
 /// This function is a shortcut for `Ulid::generate().into()`.
