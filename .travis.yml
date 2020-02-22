@@ -31,6 +31,7 @@ script:
   - cargo test --no-default-features --features "chrono rand serde"
   - cargo test --no-default-features --features "chrono rand doc-comment serde"
   - cargo test --verbose
+  - cargo doc
 
 jobs:
   fast_finish: true
@@ -50,6 +51,10 @@ addons:
       - gcc
       - binutils-dev
       - libiberty-dev
+  homebrew:
+    packages:
+      - bash
+      - python
 
 after_success: |
   wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz &&
