@@ -9,7 +9,7 @@ rust:
 
 env:
   global:
-    - RUSTFLAGS: "-D warnings"
+    - RUSTFLAGS = '-D warnings'
 
 jobs:
   allow_failures:
