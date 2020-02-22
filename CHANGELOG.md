@@ -6,11 +6,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased][unreleased]
+### Changed
+- `cargo update`
+
+### Removed
+- `#![deny(warnings)]`
 
 ## [0.9.2] - 2020-01-10
 ### Changed
 - criterion 0.3
-- cargo update
+- `cargo update`
 
 ### Removed
 - test of deprecated function result to fix build on 1.42-nightly

@@ -38,7 +38,7 @@
  */
 
 #![doc(html_root_url = "https://docs.rs/rusty_ulid/0.9.2")]
-#![deny(warnings, missing_docs)]
+#![deny(missing_docs)]
 #![forbid(unsafe_code)]
 
 //! # ULID - Universally Unique Lexicographically Sortable Identifier

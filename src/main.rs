@@ -37,7 +37,7 @@
  * limitations under the License.
  */
 
-#![deny(warnings, missing_docs)]
+#![deny(missing_docs)]
 #![allow(dead_code)]
 #![forbid(unsafe_code)]
 
