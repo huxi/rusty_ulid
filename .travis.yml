@@ -3,7 +3,7 @@ language: rust
 
 os:
   - linux
-  - osx
+  # - osx
   - windows
 
 rust:
@@ -51,10 +51,6 @@ addons:
       - gcc
       - binutils-dev
       - libiberty-dev
-  homebrew:
-    packages:
-      - bash
-      - python
 
 after_success: |
   wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz &&
