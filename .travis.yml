@@ -11,6 +11,22 @@ env:
   global:
     - RUSTFLAGS='-D warnings'
 
+before_script:
+  - rustup component add clippy
+  - rustup component add rustfmt
+
+script:
+  - cargo build --verbose
+  - cargo clippy --all-targets --all-features -- -D warnings
+  - cargo fmt --all -- --check
+  - cargo test --no-default-features
+  - cargo test --no-default-features --features "rand"
+  - cargo test --no-default-features --features "chrono"
+  - cargo test --no-default-features --features "serde"
+  - cargo test --no-default-features --features "chrono rand serde"
+  - cargo test --no-default-features --features "chrono rand doc-comment serde"
+  - cargo test --verbose
+
 jobs:
   allow_failures:
     - rust: nightly
