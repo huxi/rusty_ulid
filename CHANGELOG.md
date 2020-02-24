@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - `cargo update`
 
-### Removed
-- `#![deny(warnings)]`
+### Fixed
+- [`#![deny(warnings)]`](https://github.com/rust-unofficial/patterns/blob/master/anti_patterns/deny-warnings.md) anti-pattern
 
 ## [0.9.2] - 2020-01-10
 ### Changed
