@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - `cargo update`
+- Requires Rust 1.40 or later
 
 ## [0.9.3] - 2020-02-24
 ### Changed
