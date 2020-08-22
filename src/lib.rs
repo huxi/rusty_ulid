@@ -383,10 +383,105 @@ impl Ulid {
     where
         R: rand::Rng,
     {
-        if previous_ulid.timestamp() == timestamp {
-            previous_ulid.increment()
+        Ulid::next_monotonic_from_timestamp_with_rng_and_preprocessor(
+            Some(previous_ulid),
+            timestamp,
+            rng,
+            None,
+        )
+    }
+
+    /// Creates the next monotonic ULID with the given `previous_ulid`, `timestamp`
+    /// obtaining randomness from `rng`. If a new ULID is created instead of simply
+    /// incrementing the previous ULID, then `preprocessor` is used (if available)
+    /// to transform the new ULID before returning it.
+    ///
+    /// If the random part of `previous_ulid` would overflow, this function returns a ULID with
+    /// the random part set to zero.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rusty_ulid::Ulid;
+    ///
+    /// let previous_ulid = Ulid::from(0);
+    /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng_and_preprocessor(Some(previous_ulid), 0, &mut rand::thread_rng(), None);
+    ///
+    /// assert_eq!(ulid, Ulid::from(1));
+    /// ```
+    ///
+    /// ```
+    /// use rusty_ulid::Ulid;
+    ///
+    /// let previous_ulid = Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFE);
+    /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng_and_preprocessor(Some(previous_ulid), 0, &mut rand::thread_rng(), None);
+    ///
+    /// assert_eq!(ulid, Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFF));
+    /// ```
+    ///
+    /// ```
+    /// use rusty_ulid::Ulid;
+    ///
+    /// let previous_ulid = Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFF);
+    /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng_and_preprocessor(Some(previous_ulid), 0, &mut rand::thread_rng(), None);
+    ///
+    /// // overflow results in zero random part
+    /// assert_eq!(ulid, Ulid::from(0));
+    /// ```
+    ///
+    /// ```
+    /// use rusty_ulid::Ulid;
+    ///
+    /// fn preprocessor_fn(ulid: Ulid) -> Ulid {
+    ///     // zero out lowest 32 bits
+    ///     Ulid::from(u128::from(ulid) & 0xFFFFFFFF_FFFFFFFF_FFFFFFFF_00000000)
+    /// }
+    ///
+    /// let previous_ulid = Ulid::from(0);
+    /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng_and_preprocessor(
+    ///     Some(previous_ulid),
+    ///     1,
+    ///     &mut rand::thread_rng(),
+    ///     Some(&preprocessor_fn),
+    /// );
+    ///
+    /// assert_eq!(0, u128::from(ulid) & 0xFFFFFFFF);
+    ///
+    /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng_and_preprocessor(
+    ///     None,
+    ///     1,
+    ///     &mut rand::thread_rng(),
+    ///     Some(&preprocessor_fn),
+    /// );
+    ///
+    /// assert_eq!(0, u128::from(ulid) & 0xFFFFFFFF);
+    /// assert_ne!(0, u128::from(ulid));
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// Panics if `timestamp` is larger than `0xFFFF_FFFF_FFFF`.
+    #[cfg(feature = "rand")]
+    pub fn next_monotonic_from_timestamp_with_rng_and_preprocessor<R>(
+        previous_ulid: Option<Ulid>,
+        timestamp: u64,
+        rng: &mut R,
+        preprocessor: Option<&dyn Fn(Ulid) -> Ulid>,
+    ) -> Ulid
+    where
+        R: rand::Rng,
+    {
+        if let Some(previous_ulid) = previous_ulid {
+            if previous_ulid.timestamp() == timestamp {
+                return previous_ulid.increment();
+            }
+        }
+
+        let result = Ulid::from_timestamp_with_rng(timestamp, rng);
+        if let Some(preprocessor) = preprocessor {
+            preprocessor(result)
         } else {
-            Ulid::from_timestamp_with_rng(timestamp, rng)
+            result
         }
     }
 
@@ -443,6 +538,103 @@ impl Ulid {
             Some(result)
         } else {
             None
+        }
+    }
+
+    /// Creates the next strictly monotonic ULID with the given `previous_ulid`, `timestamp`
+    /// obtaining randomness from `rng`.
+    ///
+    /// If the random part of `previous_ulid` would overflow, this function returns `None`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rusty_ulid::Ulid;
+    ///
+    /// let previous_ulid = Ulid::from(0);
+    /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng_and_preprocessor(Some(previous_ulid), 0, &mut rand::thread_rng(), None);
+    ///
+    /// assert_eq!(ulid, Some(Ulid::from(1)));
+    /// ```
+    ///
+    /// ```
+    /// use rusty_ulid::Ulid;
+    ///
+    /// let previous_ulid = Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFE);
+    /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng_and_preprocessor(Some(previous_ulid), 0, &mut rand::thread_rng(), None);
+    ///
+    /// assert_eq!(ulid, Some(Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFF)));
+    /// ```
+    ///
+    /// ```
+    /// use rusty_ulid::Ulid;
+    ///
+    /// let previous_ulid = Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFF);
+    /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng_and_preprocessor(Some(previous_ulid), 0, &mut rand::thread_rng(), None);
+    ///
+    /// // overflow results in None
+    /// assert_eq!(ulid, None);
+    /// ```
+    ///
+    /// ```
+    /// use rusty_ulid::Ulid;
+    ///
+    /// fn preprocessor_fn(ulid: Ulid) -> Ulid {
+    ///     // zero out lowest 32 bits
+    ///     Ulid::from(u128::from(ulid) & 0xFFFFFFFF_FFFFFFFF_FFFFFFFF_00000000)
+    /// }
+    ///
+    /// let previous_ulid = Ulid::from(0);
+    /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng_and_preprocessor(
+    ///     Some(previous_ulid),
+    ///     1,
+    ///     &mut rand::thread_rng(),
+    ///     Some(&preprocessor_fn),
+    /// );
+    /// let ulid = ulid.unwrap();
+    ///
+    /// assert_eq!(0, u128::from(ulid) & 0xFFFFFFFF);
+    ///
+    /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng_and_preprocessor(
+    ///     None,
+    ///     1,
+    ///     &mut rand::thread_rng(),
+    ///     Some(&preprocessor_fn),
+    /// );
+    /// let ulid = ulid.unwrap();
+    ///
+    /// assert_eq!(0, u128::from(ulid) & 0xFFFFFFFF);
+    /// assert_ne!(0, u128::from(ulid));
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// Panics if `timestamp` is larger than `0xFFFF_FFFF_FFFF`.
+    #[cfg(feature = "rand")]
+    pub fn next_strictly_monotonic_from_timestamp_with_rng_and_preprocessor<R>(
+        previous_ulid: Option<Ulid>,
+        timestamp: u64,
+        rng: &mut R,
+        preprocessor: Option<&dyn Fn(Ulid) -> Ulid>,
+    ) -> Option<Ulid>
+    where
+        R: rand::Rng,
+    {
+        let result = Ulid::next_monotonic_from_timestamp_with_rng_and_preprocessor(
+            previous_ulid,
+            timestamp,
+            rng,
+            preprocessor,
+        );
+
+        if let Some(previous_ulid) = previous_ulid {
+            if previous_ulid < result {
+                Some(result)
+            } else {
+                None
+            }
+        } else {
+            Some(result)
         }
     }
 
@@ -1131,12 +1323,12 @@ mod tests {
         assert_eq!(ulid_one_low.eq(&ulid_one_low), true);
         assert_eq!(ulid_one_low.cmp(&ulid_one_low), Ordering::Equal);
 
-        assert!(ulid_one_low == ulid_one_low_other);
+        assert_eq!(ulid_one_low, ulid_one_low_other);
         assert_eq!(ulid_one_low.eq(&ulid_one_low_other), true);
         assert_eq!(ulid_one_low.cmp(&ulid_one_low_other), Ordering::Equal);
 
-        assert!(ulid_one_low != ulid_two_low);
-        assert!(ulid_two_low != ulid_one_low);
+        assert_ne!(ulid_one_low, ulid_two_low);
+        assert_ne!(ulid_two_low, ulid_one_low);
         assert!(ulid_one_low < ulid_two_low);
         assert!(ulid_two_low > ulid_one_low);
         assert_eq!(ulid_one_low.eq(&ulid_two_low), false);
@@ -1144,8 +1336,8 @@ mod tests {
         assert_eq!(ulid_one_low.cmp(&ulid_two_low), Ordering::Less);
         assert_eq!(ulid_two_low.cmp(&ulid_one_low), Ordering::Greater);
 
-        assert!(ulid_one_low != ulid_one_high);
-        assert!(ulid_one_high != ulid_one_low);
+        assert_ne!(ulid_one_low, ulid_one_high);
+        assert_ne!(ulid_one_high, ulid_one_low);
         assert_eq!(ulid_one_low.eq(&ulid_one_high), false);
         assert_eq!(ulid_one_high.eq(&ulid_one_low), false);
         assert_eq!(ulid_one_low.cmp(&ulid_one_high), Ordering::Less);
@@ -1218,6 +1410,66 @@ mod tests {
         let ulid_value: u128 = ulid.into();
 
         assert_eq!(ulid_value, 0x0000_0000_0000_F00F_0000_0000_0000_F00F);
+    }
+
+    #[cfg(feature = "rand")]
+    #[test]
+    fn test_next_monotonic_from_timestamp_with_rng_and_preprocessor() {
+        fn preprocessor_fn(ulid: Ulid) -> Ulid {
+            // zero out lowest 32 bits
+            Ulid::from(u128::from(ulid) & 0xFFFFFFFF_FFFFFFFF_FFFFFFFF_00000000)
+        }
+
+        let previous_ulid = Ulid::from(0);
+        let ulid = Ulid::next_monotonic_from_timestamp_with_rng_and_preprocessor(
+            Some(previous_ulid),
+            1,
+            &mut rand::thread_rng(),
+            Some(&preprocessor_fn),
+        );
+
+        assert_eq!(0, u128::from(ulid) & 0xFFFFFFFF);
+
+        let ulid = Ulid::next_monotonic_from_timestamp_with_rng_and_preprocessor(
+            None,
+            1,
+            &mut rand::thread_rng(),
+            Some(&preprocessor_fn),
+        );
+
+        assert_eq!(0, u128::from(ulid) & 0xFFFFFFFF);
+        assert_ne!(0, u128::from(ulid));
+    }
+
+    #[cfg(feature = "rand")]
+    #[test]
+    fn test_next_strictly_monotonic_from_timestamp_with_rng_and_preprocessor() {
+        fn preprocessor_fn(ulid: Ulid) -> Ulid {
+            // zero out lowest 32 bits
+            Ulid::from(u128::from(ulid) & 0xFFFFFFFF_FFFFFFFF_FFFFFFFF_00000000)
+        }
+
+        let previous_ulid = Ulid::from(0);
+        let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng_and_preprocessor(
+            Some(previous_ulid),
+            1,
+            &mut rand::thread_rng(),
+            Some(&preprocessor_fn),
+        );
+        let ulid = ulid.unwrap();
+
+        assert_eq!(0, u128::from(ulid) & 0xFFFFFFFF);
+
+        let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng_and_preprocessor(
+            None,
+            1,
+            &mut rand::thread_rng(),
+            Some(&preprocessor_fn),
+        );
+        let ulid = ulid.unwrap();
+
+        assert_eq!(0, u128::from(ulid) & 0xFFFFFFFF);
+        assert_ne!(0, u128::from(ulid));
     }
 }
 

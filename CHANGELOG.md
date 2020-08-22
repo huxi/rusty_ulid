@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased][unreleased]
+### Added
+- support preprocessing of monotonic ULID values
+    - `next_monotonic_from_timestamp_with_rng_and_preprocessor`
+    - `next_strictly_monotonic_from_timestamp_with_rng_and_preprocessor`
+
 ### Changed
 - `cargo update`
 
