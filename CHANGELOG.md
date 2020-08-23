@@ -8,8 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased][unreleased]
 ### Added
 - support preprocessing of monotonic ULID values
-    - `next_monotonic_from_timestamp_with_rng_and_preprocessor`
-    - `next_strictly_monotonic_from_timestamp_with_rng_and_preprocessor`
+    - `next_monotonic_from_timestamp_with_rng_and_postprocessor`
+    - `next_strictly_monotonic_from_timestamp_with_rng_and_postrocessor`
 
 ### Changed
 - `cargo update`
