@@ -105,10 +105,10 @@ static DECODING_DIGITS: [Option<u8>; 123] = [
     Some(29), Some(30), Some(31),
 ];
 
-#[derive(Debug, PartialEq)]
 /// Error that can occur while decoding a [crockford Base32][crockford] string.
 ///
 /// [crockford]: https://crockford.com/wrmg/base32.html
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum DecodingError {
     /// The length of the parsed string or given slice of bytes does not conform to requirements.
     InvalidLength,
@@ -128,9 +128,9 @@ impl Error for DecodingError {}
 impl fmt::Display for DecodingError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         match *self {
-            DecodingError::InvalidLength => write!(f, "invalid length"),
-            DecodingError::InvalidChar(c) => write!(f, "invalid character '{}'", c),
-            DecodingError::DataTypeOverflow => write!(f, "data type overflow"),
+            Self::InvalidLength => write!(f, "invalid length"),
+            Self::InvalidChar(c) => write!(f, "invalid character '{}'", c),
+            Self::DataTypeOverflow => write!(f, "data type overflow"),
         }
     }
 }
@@ -354,6 +354,7 @@ pub fn parse_crockford_u128(input: &str) -> Result<u128, DecodingError> {
 ///
 /// assert_eq!(a_string, "7ZZZZZZZZZZZZZZZZZZZZZZZZZ");
 /// ```
+#[allow(clippy::cast_possible_truncation)]
 pub fn append_crockford_u64_tuple(value: (u64, u64), to_append_to: &mut String) {
     to_append_to.push(ENCODING_DIGITS[(value.0 >> 61) as usize]);
     to_append_to.push(ENCODING_DIGITS[((value.0 >> 56) & MASK_U64) as usize]);

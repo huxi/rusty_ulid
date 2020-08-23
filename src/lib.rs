@@ -39,6 +39,9 @@
 
 #![doc(html_root_url = "https://docs.rs/rusty_ulid/0.9.3")]
 #![deny(missing_docs)]
+#![deny(clippy::all)]
+#![warn(rust_2018_idioms, missing_debug_implementations)]
+//#![deny(clippy::pedantic)]
 #![forbid(unsafe_code)]
 
 //! # ULID - Universally Unique Lexicographically Sortable Identifier
@@ -173,6 +176,7 @@ pub use crate::crockford::DecodingError;
 /// Returns the number of non-leap milliseconds since January 1, 1970 0:00:00 UTC
 /// (aka "UNIX timestamp").
 #[cfg(all(feature = "rand", feature = "chrono"))]
+#[allow(clippy::cast_sign_loss)]
 fn unix_epoch_ms() -> u64 {
     let now: DateTime<Utc> = Utc::now();
 
@@ -192,6 +196,7 @@ fn unix_epoch_ms() -> u64 {
 /// assert_eq!(ulid_string.len(), 26);
 /// ```
 #[cfg(all(feature = "rand", feature = "chrono"))]
+#[must_use]
 pub fn generate_ulid_string() -> String {
     Ulid::generate().to_string()
 }
@@ -209,6 +214,7 @@ pub fn generate_ulid_string() -> String {
 /// assert_eq!(ulid_bytes.len(), 16);
 /// ```
 #[cfg(all(feature = "rand", feature = "chrono"))]
+#[must_use]
 pub fn generate_ulid_bytes() -> [u8; 16] {
     Ulid::generate().into()
 }
@@ -240,8 +246,9 @@ impl Ulid {
     ///
     /// Panics if called after `+10889-08-02T05:31:50.655Z`.
     #[cfg(all(feature = "rand", feature = "chrono"))]
-    pub fn generate() -> Ulid {
-        Ulid::from_timestamp_with_rng(unix_epoch_ms(), &mut rand::thread_rng())
+    #[must_use]
+    pub fn generate() -> Self {
+        Self::from_timestamp_with_rng(unix_epoch_ms(), &mut rand::thread_rng())
     }
 
     /// Creates the next monotonic ULID for the given `previous_ulid`.
@@ -264,8 +271,9 @@ impl Ulid {
     ///
     /// Panics if called after `+10889-08-02T05:31:50.655Z`.
     #[cfg(all(feature = "rand", feature = "chrono"))]
-    pub fn next_monotonic(previous_ulid: Ulid) -> Ulid {
-        Ulid::next_monotonic_from_timestamp_with_rng(
+    #[must_use]
+    pub fn next_monotonic(previous_ulid: Self) -> Self {
+        Self::next_monotonic_from_timestamp_with_rng(
             previous_ulid,
             unix_epoch_ms(),
             &mut rand::thread_rng(),
@@ -293,8 +301,9 @@ impl Ulid {
     ///
     /// Panics if called after `+10889-08-02T05:31:50.655Z`.
     #[cfg(all(feature = "rand", feature = "chrono"))]
-    pub fn next_strictly_monotonic(previous_ulid: Ulid) -> Option<Ulid> {
-        Ulid::next_strictly_monotonic_from_timestamp_with_rng(
+    #[must_use]
+    pub fn next_strictly_monotonic(previous_ulid: Self) -> Option<Self> {
+        Self::next_strictly_monotonic_from_timestamp_with_rng(
             previous_ulid,
             unix_epoch_ms(),
             &mut rand::thread_rng(),
@@ -320,7 +329,7 @@ impl Ulid {
     ///
     /// Panics if `timestamp` is larger than `0xFFFF_FFFF_FFFF`.
     #[cfg(feature = "rand")]
-    pub fn from_timestamp_with_rng<R>(timestamp: u64, rng: &mut R) -> Ulid
+    pub fn from_timestamp_with_rng<R>(timestamp: u64, rng: &mut R) -> Self
     where
         R: rand::Rng,
     {
@@ -332,7 +341,7 @@ impl Ulid {
         let low = rng.gen::<u64>();
         let value = (high, low);
 
-        Ulid { value }
+        Self { value }
     }
 
     /// Creates the next monotonic ULID with the given `previous_ulid`, `timestamp`
@@ -376,14 +385,14 @@ impl Ulid {
     /// Panics if `timestamp` is larger than `0xFFFF_FFFF_FFFF`.
     #[cfg(feature = "rand")]
     pub fn next_monotonic_from_timestamp_with_rng<R>(
-        previous_ulid: Ulid,
+        previous_ulid: Self,
         timestamp: u64,
         rng: &mut R,
-    ) -> Ulid
+    ) -> Self
     where
         R: rand::Rng,
     {
-        Ulid::next_monotonic_from_timestamp_with_rng_and_preprocessor(
+        Self::next_monotonic_from_timestamp_with_rng_and_preprocessor(
             Some(previous_ulid),
             timestamp,
             rng,
@@ -434,7 +443,7 @@ impl Ulid {
     ///
     /// fn preprocessor_fn(ulid: Ulid) -> Ulid {
     ///     // zero out lowest 32 bits
-    ///     Ulid::from(u128::from(ulid) & 0xFFFFFFFF_FFFFFFFF_FFFFFFFF_00000000)
+    ///     Ulid::from(u128::from(ulid) & 0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_0000_0000)
     /// }
     ///
     /// let previous_ulid = Ulid::from(0);
@@ -445,7 +454,7 @@ impl Ulid {
     ///     Some(&preprocessor_fn),
     /// );
     ///
-    /// assert_eq!(0, u128::from(ulid) & 0xFFFFFFFF);
+    /// assert_eq!(0, u128::from(ulid) & 0xFFFF_FFFF);
     ///
     /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng_and_preprocessor(
     ///     None,
@@ -454,7 +463,7 @@ impl Ulid {
     ///     Some(&preprocessor_fn),
     /// );
     ///
-    /// assert_eq!(0, u128::from(ulid) & 0xFFFFFFFF);
+    /// assert_eq!(0, u128::from(ulid) & 0xFFFF_FFFF);
     /// assert_ne!(0, u128::from(ulid));
     /// ```
     ///
@@ -463,11 +472,11 @@ impl Ulid {
     /// Panics if `timestamp` is larger than `0xFFFF_FFFF_FFFF`.
     #[cfg(feature = "rand")]
     pub fn next_monotonic_from_timestamp_with_rng_and_preprocessor<R>(
-        previous_ulid: Option<Ulid>,
+        previous_ulid: Option<Self>,
         timestamp: u64,
         rng: &mut R,
-        preprocessor: Option<&dyn Fn(Ulid) -> Ulid>,
-    ) -> Ulid
+        preprocessor: Option<&dyn Fn(Self) -> Self>,
+    ) -> Self
     where
         R: rand::Rng,
     {
@@ -477,12 +486,8 @@ impl Ulid {
             }
         }
 
-        let result = Ulid::from_timestamp_with_rng(timestamp, rng);
-        if let Some(preprocessor) = preprocessor {
-            preprocessor(result)
-        } else {
-            result
-        }
+        let result = Self::from_timestamp_with_rng(timestamp, rng);
+        preprocessor.map_or(result, |preprocessor| preprocessor(result))
     }
 
     /// Creates the next strictly monotonic ULID with the given `previous_ulid`, `timestamp`
@@ -525,14 +530,14 @@ impl Ulid {
     /// Panics if `timestamp` is larger than `0xFFFF_FFFF_FFFF`.
     #[cfg(feature = "rand")]
     pub fn next_strictly_monotonic_from_timestamp_with_rng<R>(
-        previous_ulid: Ulid,
+        previous_ulid: Self,
         timestamp: u64,
         rng: &mut R,
-    ) -> Option<Ulid>
+    ) -> Option<Self>
     where
         R: rand::Rng,
     {
-        let result = Ulid::next_monotonic_from_timestamp_with_rng(previous_ulid, timestamp, rng);
+        let result = Self::next_monotonic_from_timestamp_with_rng(previous_ulid, timestamp, rng);
 
         if previous_ulid < result {
             Some(result)
@@ -581,7 +586,7 @@ impl Ulid {
     ///
     /// fn preprocessor_fn(ulid: Ulid) -> Ulid {
     ///     // zero out lowest 32 bits
-    ///     Ulid::from(u128::from(ulid) & 0xFFFFFFFF_FFFFFFFF_FFFFFFFF_00000000)
+    ///     Ulid::from(u128::from(ulid) & 0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_0000_0000)
     /// }
     ///
     /// let previous_ulid = Ulid::from(0);
@@ -593,7 +598,7 @@ impl Ulid {
     /// );
     /// let ulid = ulid.unwrap();
     ///
-    /// assert_eq!(0, u128::from(ulid) & 0xFFFFFFFF);
+    /// assert_eq!(0, u128::from(ulid) & 0xFFFF_FFFF);
     ///
     /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng_and_preprocessor(
     ///     None,
@@ -603,7 +608,7 @@ impl Ulid {
     /// );
     /// let ulid = ulid.unwrap();
     ///
-    /// assert_eq!(0, u128::from(ulid) & 0xFFFFFFFF);
+    /// assert_eq!(0, u128::from(ulid) & 0xFFFF_FFFF);
     /// assert_ne!(0, u128::from(ulid));
     /// ```
     ///
@@ -612,30 +617,28 @@ impl Ulid {
     /// Panics if `timestamp` is larger than `0xFFFF_FFFF_FFFF`.
     #[cfg(feature = "rand")]
     pub fn next_strictly_monotonic_from_timestamp_with_rng_and_preprocessor<R>(
-        previous_ulid: Option<Ulid>,
+        previous_ulid: Option<Self>,
         timestamp: u64,
         rng: &mut R,
-        preprocessor: Option<&dyn Fn(Ulid) -> Ulid>,
-    ) -> Option<Ulid>
+        preprocessor: Option<&dyn Fn(Self) -> Self>,
+    ) -> Option<Self>
     where
         R: rand::Rng,
     {
-        let result = Ulid::next_monotonic_from_timestamp_with_rng_and_preprocessor(
+        let result = Self::next_monotonic_from_timestamp_with_rng_and_preprocessor(
             previous_ulid,
             timestamp,
             rng,
             preprocessor,
         );
 
-        if let Some(previous_ulid) = previous_ulid {
+        previous_ulid.map_or(Some(result), |previous_ulid| {
             if previous_ulid < result {
                 Some(result)
             } else {
                 None
             }
-        } else {
-            Some(result)
-        }
+        })
     }
 
     /// Returns the timestamp of this ULID as number
@@ -653,6 +656,7 @@ impl Ulid {
     /// assert_eq!(timestamp, 1523144390168);
     /// # Ok::<(), rusty_ulid::DecodingError>(())
     /// ```
+    #[must_use]
     pub fn timestamp(&self) -> u64 {
         (self.value.0 >> 16) as u64
     }
@@ -672,6 +676,9 @@ impl Ulid {
     /// # Ok::<(), rusty_ulid::DecodingError>(())
     /// ```
     #[cfg(feature = "chrono")]
+    #[allow(clippy::cast_possible_wrap)]
+    #[allow(clippy::cast_possible_truncation)]
+    #[must_use]
     pub fn datetime(&self) -> DateTime<Utc> {
         let timestamp = self.timestamp();
         let seconds: i64 = (timestamp / 1000) as i64;
@@ -713,7 +720,8 @@ impl Ulid {
     ///
     /// assert_eq!(incremented, Ulid::from(0));
     /// ```
-    pub fn increment(self) -> Ulid {
+    #[must_use]
+    pub fn increment(self) -> Self {
         const TIMESTAMP_PART_MASK: u128 = 0xFFFF_FFFF_FFFF_0000_0000_0000_0000_0000;
         const RANDOM_PART_MASK: u128 = !TIMESTAMP_PART_MASK;
 
@@ -750,6 +758,7 @@ impl Ulid {
     #[allow(clippy::inherent_to_string_shadow_display)]
     // impl fmt::Display is using this method
     // https://github.com/rust-lang/rust-clippy/issues/4396
+    #[must_use]
     pub fn to_string(&self) -> String {
         let mut string = String::with_capacity(26);
 
@@ -771,7 +780,7 @@ impl FromStr for Ulid {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let value = crockford::parse_crockford_u64_tuple(s)?;
 
-        Ok(Ulid { value })
+        Ok(Self { value })
     }
 }
 
@@ -807,6 +816,7 @@ impl From<[u8; 16]> for Ulid {
     ///
     /// assert_eq!(ulid, expected_ulid);
     /// ```
+    #[must_use]
     fn from(bytes: [u8; 16]) -> Self {
         #[rustfmt::skip]
         let high = u64::from(bytes[0]) << 56
@@ -829,7 +839,7 @@ impl From<[u8; 16]> for Ulid {
             | u64::from(bytes[15]);
 
         let value = (high, low);
-        Ulid { value }
+        Self { value }
     }
 }
 
@@ -866,26 +876,28 @@ impl From<Ulid> for [u8; 16] {
     /// assert_eq!(bytes, expected_bytes);
     /// ```
     #[rustfmt::skip]
+    #[allow(clippy::cast_possible_truncation)]
+    #[must_use]
     fn from(ulid: Ulid) -> Self {
         let value = ulid.value;
 
         [
-            ((value.0 >> 56) & 0xff) as u8,
-            ((value.0 >> 48) & 0xff) as u8,
-            ((value.0 >> 40) & 0xff) as u8,
-            ((value.0 >> 32) & 0xff) as u8,
-            ((value.0 >> 24) & 0xff) as u8,
-            ((value.0 >> 16) & 0xff) as u8,
-            ((value.0 >> 8) & 0xff) as u8,
-            (value.0 & 0xff) as u8,
-            ((value.1 >> 56) & 0xff) as u8,
-            ((value.1 >> 48) & 0xff) as u8,
-            ((value.1 >> 40) & 0xff) as u8,
-            ((value.1 >> 32) & 0xff) as u8,
-            ((value.1 >> 24) & 0xff) as u8,
-            ((value.1 >> 16) & 0xff) as u8,
-            ((value.1 >> 8) & 0xff) as u8,
-            (value.1 & 0xff) as u8,
+            ((value.0 >> 56) & 0xFF) as u8,
+            ((value.0 >> 48) & 0xFF) as u8,
+            ((value.0 >> 40) & 0xFF) as u8,
+            ((value.0 >> 32) & 0xFF) as u8,
+            ((value.0 >> 24) & 0xFF) as u8,
+            ((value.0 >> 16) & 0xFF) as u8,
+            ((value.0 >> 8) & 0xFF) as u8,
+            (value.0 & 0xFF) as u8,
+            ((value.1 >> 56) & 0xFF) as u8,
+            ((value.1 >> 48) & 0xFF) as u8,
+            ((value.1 >> 40) & 0xFF) as u8,
+            ((value.1 >> 32) & 0xFF) as u8,
+            ((value.1 >> 24) & 0xFF) as u8,
+            ((value.1 >> 16) & 0xFF) as u8,
+            ((value.1 >> 8) & 0xFF) as u8,
+            (value.1 & 0xFF) as u8,
         ]
     }
 }
@@ -916,8 +928,9 @@ impl From<(u64, u64)> for Ulid {
     ///
     /// assert_eq!(ulid, expected_ulid);
     /// ```
+    #[must_use]
     fn from(value: (u64, u64)) -> Self {
-        Ulid { value }
+        Self { value }
     }
 }
 
@@ -947,6 +960,7 @@ impl From<Ulid> for (u64, u64) {
     ///
     /// assert_eq!(tuple, expected_tuple);
     /// ```
+    #[must_use]
     fn from(ulid: Ulid) -> Self {
         ulid.value
     }
@@ -978,9 +992,11 @@ impl From<u128> for Ulid {
     ///
     /// assert_eq!(ulid, expected_ulid);
     /// ```
+    #[allow(clippy::cast_possible_truncation)]
+    #[must_use]
     fn from(value: u128) -> Self {
         let value = ((value >> 64) as u64, (value & 0xFFFF_FFFF_FFFF_FFFF) as u64);
-        Ulid { value }
+        Self { value }
     }
 }
 
@@ -1010,8 +1026,9 @@ impl From<Ulid> for u128 {
     ///
     /// assert_eq!(value, expected_value);
     /// ```
+    #[must_use]
     fn from(ulid: Ulid) -> Self {
-        u128::from(ulid.value.0) << 64 | u128::from(ulid.value.1)
+        Self::from(ulid.value.0) << 64 | Self::from(ulid.value.1)
     }
 }
 
@@ -1070,7 +1087,7 @@ impl TryFrom<&[u8]> for Ulid {
     ///
     /// assert_eq!(result, Err(DecodingError::InvalidLength))
     /// ```
-    fn try_from(bytes: &[u8]) -> Result<Ulid, DecodingError> {
+    fn try_from(bytes: &[u8]) -> Result<Self, DecodingError> {
         if bytes.len() != 16 {
             return Err(DecodingError::InvalidLength);
         }
@@ -1096,7 +1113,7 @@ impl TryFrom<&[u8]> for Ulid {
             | u64::from(bytes[15]);
 
         let value = (high, low);
-        Ok(Ulid { value })
+        Ok(Self { value })
     }
 }
 
@@ -1417,7 +1434,7 @@ mod tests {
     fn test_next_monotonic_from_timestamp_with_rng_and_preprocessor() {
         fn preprocessor_fn(ulid: Ulid) -> Ulid {
             // zero out lowest 32 bits
-            Ulid::from(u128::from(ulid) & 0xFFFFFFFF_FFFFFFFF_FFFFFFFF_00000000)
+            Ulid::from(u128::from(ulid) & 0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_0000_0000)
         }
 
         let previous_ulid = Ulid::from(0);
@@ -1428,7 +1445,7 @@ mod tests {
             Some(&preprocessor_fn),
         );
 
-        assert_eq!(0, u128::from(ulid) & 0xFFFFFFFF);
+        assert_eq!(0, u128::from(ulid) & 0xFFFF_FFFF);
 
         let ulid = Ulid::next_monotonic_from_timestamp_with_rng_and_preprocessor(
             None,
@@ -1437,7 +1454,7 @@ mod tests {
             Some(&preprocessor_fn),
         );
 
-        assert_eq!(0, u128::from(ulid) & 0xFFFFFFFF);
+        assert_eq!(0, u128::from(ulid) & 0xFFFF_FFFF);
         assert_ne!(0, u128::from(ulid));
     }
 
@@ -1446,7 +1463,7 @@ mod tests {
     fn test_next_strictly_monotonic_from_timestamp_with_rng_and_preprocessor() {
         fn preprocessor_fn(ulid: Ulid) -> Ulid {
             // zero out lowest 32 bits
-            Ulid::from(u128::from(ulid) & 0xFFFFFFFF_FFFFFFFF_FFFFFFFF_00000000)
+            Ulid::from(u128::from(ulid) & 0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_0000_0000)
         }
 
         let previous_ulid = Ulid::from(0);
@@ -1458,7 +1475,7 @@ mod tests {
         );
         let ulid = ulid.unwrap();
 
-        assert_eq!(0, u128::from(ulid) & 0xFFFFFFFF);
+        assert_eq!(0, u128::from(ulid) & 0xFFFF_FFFF);
 
         let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng_and_preprocessor(
             None,
@@ -1468,7 +1485,7 @@ mod tests {
         );
         let ulid = ulid.unwrap();
 
-        assert_eq!(0, u128::from(ulid) & 0xFFFFFFFF);
+        assert_eq!(0, u128::from(ulid) & 0xFFFF_FFFF);
         assert_ne!(0, u128::from(ulid));
     }
 }
@@ -1482,7 +1499,7 @@ mod doc_tests {
 #[cfg(all(test, feature = "serde"))]
 mod serde_tests {
     use super::*;
-    use serde_test::*;
+    use serde_test::{assert_de_tokens_error, assert_tokens, Compact, Readable, Token};
 
     #[test]
     fn test_serde_readable() {
