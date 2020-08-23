@@ -38,9 +38,22 @@
  */
 
 #![doc(html_root_url = "https://docs.rs/rusty_ulid/0.9.3")]
-#![deny(missing_docs)]
+#![deny(
+    anonymous_parameters,
+    bare_trait_objects,
+    missing_copy_implementations,
+    missing_debug_implementations,
+    missing_docs,
+    rust_2018_idioms,
+    trivial_casts,
+    trivial_numeric_casts,
+    unreachable_pub,
+    unused_import_braces,
+    unused_qualifications,
+    unused_results,
+    variant_size_differences
+)]
 #![deny(clippy::all)]
-#![warn(rust_2018_idioms, missing_debug_implementations)]
 //#![deny(clippy::pedantic)]
 #![forbid(unsafe_code)]
 
@@ -658,7 +671,7 @@ impl Ulid {
     /// ```
     #[must_use]
     pub fn timestamp(&self) -> u64 {
-        (self.value.0 >> 16) as u64
+        self.value.0 >> 16
     }
 
     /// Returns the timestamp of this ULID as a `DateTime<Utc>`.
@@ -775,7 +788,7 @@ impl fmt::Display for Ulid {
 }
 
 impl FromStr for Ulid {
-    type Err = crockford::DecodingError;
+    type Err = DecodingError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let value = crockford::parse_crockford_u64_tuple(s)?;
@@ -1406,7 +1419,7 @@ mod tests {
         use rand::rngs::mock::StepRng;
 
         let mut mock_rng = StepRng::new(0, 0);
-        Ulid::from_timestamp_with_rng(0x0001_0000_0000_0000, &mut mock_rng);
+        let _ = Ulid::from_timestamp_with_rng(0x0001_0000_0000_0000, &mut mock_rng);
     }
 
     #[cfg(feature = "rand")]
