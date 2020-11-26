@@ -232,7 +232,7 @@ pub fn generate_ulid_bytes() -> [u8; 16] {
     Ulid::generate().into()
 }
 
-#[derive(Debug, PartialOrd, Ord, PartialEq, Eq, Clone, Copy, Hash)]
+#[derive(Debug, Default, PartialOrd, Ord, PartialEq, Eq, Clone, Copy, Hash)]
 /// The ULID data type.
 pub struct Ulid {
     value: (u64, u64),
