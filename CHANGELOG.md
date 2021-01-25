@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - `cargo update`
 
+### Removed
+- dependency on `time 0.1` by disabling `oldclock` feature of `chrono` crate
+
 ## [0.10.0] - 2020-08-23
 ### Added
 - support postprocessing of monotonic ULID values
