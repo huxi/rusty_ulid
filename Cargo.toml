@@ -1,7 +1,7 @@
 # See https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
 name = "rusty_ulid"
-version = "0.10.0"  # remember to update html_root_url in src/lib.rs
+version = "0.10.1"  # remember to update html_root_url in src/lib.rs
 description = "Rust ULID (Universally Unique Lexicographically Sortable Identifier) generation and processing"
 authors = ["Joern Huxhorn <jhuxhorn@googlemail.com>"]
 repository = "https://github.com/huxi/rusty_ulid"

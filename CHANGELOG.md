@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased][unreleased]
+
+## [0.10.1] - 2021-01-25
 ### Changed
 - `cargo update`
 
@@ -163,7 +165,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Everything. This was the initial release.
 
-[unreleased]: https://github.com/huxi/rusty_ulid/compare/0.10.0...HEAD
+[unreleased]: https://github.com/huxi/rusty_ulid/compare/0.10.1...HEAD
+[0.10.1]: https://github.com/huxi/rusty_ulid/compare/0.10.0...0.10.1
 [0.10.0]: https://github.com/huxi/rusty_ulid/compare/0.9.3...0.10.0
 [0.9.3]: https://github.com/huxi/rusty_ulid/compare/0.9.2...0.9.3
 [0.9.2]: https://github.com/huxi/rusty_ulid/compare/0.9.1...0.9.2
