@@ -56,6 +56,7 @@
 #![deny(clippy::all)]
 //#![deny(clippy::pedantic)]
 #![forbid(unsafe_code)]
+#![allow(unknown_lints)]
 
 //! # ULID - Universally Unique Lexicographically Sortable Identifier
 //!
@@ -785,7 +786,6 @@ impl Ulid {
     ///
     /// assert_eq!(ulid.to_string(), "7ZZZZZZZZZZZZZZZZZZZZZZZZZ");
     /// ```
-    #[allow(clippy::unknown_clippy_lints)]
     #[allow(clippy::inherent_to_string_shadow_display)]
     // impl fmt::Display is using this method
     // https://github.com/rust-lang/rust-clippy/issues/4396
