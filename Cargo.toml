@@ -10,7 +10,7 @@ readme = "README.md"
 edition = "2018"
 
 keywords = ["ulid", "uuid", "sortable", "identifier"]
-categories = ["data-structures","date-and-time","encoding","parsing","value-formatting"]
+categories = ["data-structures", "date-and-time", "encoding", "parsing", "value-formatting"]
 
 [features]
 # The default set of optional packages. Most people will want to use these
