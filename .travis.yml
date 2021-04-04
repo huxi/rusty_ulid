@@ -13,8 +13,13 @@ env:
   global:
   - RUSTFLAGS='-D warnings'
 before_script:
-- travis_wait 30 rustup component add clippy
-- travis_wait 30 rustup component add rustfmt
+- rustup component add clippy
+- rustup component add rustfmt
+
+after_script:
+- cargo install cargo-cache --no-default-features --features ci-autoclean cargo-cache
+- cargo-cache
+
 script:
 - cargo build --verbose
 - cargo clippy --all-targets --all-features -- -D warnings
