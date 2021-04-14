@@ -787,6 +787,7 @@ impl Ulid {
     /// assert_eq!(ulid.to_string(), "7ZZZZZZZZZZZZZZZZZZZZZZZZZ");
     /// ```
     #[allow(clippy::inherent_to_string_shadow_display)]
+    #[allow(clippy::wrong_self_convention)]
     // impl fmt::Display is using this method
     // https://github.com/rust-lang/rust-clippy/issues/4396
     #[must_use]
@@ -1154,7 +1155,7 @@ impl Serialize for Ulid {
         if serializer.is_human_readable() {
             serializer.serialize_str(&self.to_string())
         } else {
-            let bytes: [u8; 16] = self.clone().into();
+            let bytes: [u8; 16] = (*self).into();
             serializer.serialize_bytes(&bytes)
         }
     }
