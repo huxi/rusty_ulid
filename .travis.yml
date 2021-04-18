@@ -24,7 +24,7 @@ script:
 - echo "Rust version $TRAVIS_RUST_VERSION"
 - cargo build --verbose
 - if [ $TRAVIS_RUST_VERSION != "1.40.0" ]; then
-    cargo clippy --all-targets --all-features -- -D warnings;
+    cargo clippy --verbose --all-targets --all-features -- -D warnings;
   fi
 - cargo fmt --all -- --check
 - cargo test --verbose --no-default-features
