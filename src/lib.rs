@@ -1369,26 +1369,26 @@ mod tests {
 
         let ulid_one_low_other: Ulid = (0, 1).into();
 
-        assert_eq!(ulid_one_low.eq(&ulid_one_low), true);
+        assert!(ulid_one_low.eq(&ulid_one_low));
         assert_eq!(ulid_one_low.cmp(&ulid_one_low), Ordering::Equal);
 
         assert_eq!(ulid_one_low, ulid_one_low_other);
-        assert_eq!(ulid_one_low.eq(&ulid_one_low_other), true);
+        assert!(ulid_one_low.eq(&ulid_one_low_other));
         assert_eq!(ulid_one_low.cmp(&ulid_one_low_other), Ordering::Equal);
 
         assert_ne!(ulid_one_low, ulid_two_low);
         assert_ne!(ulid_two_low, ulid_one_low);
         assert!(ulid_one_low < ulid_two_low);
         assert!(ulid_two_low > ulid_one_low);
-        assert_eq!(ulid_one_low.eq(&ulid_two_low), false);
-        assert_eq!(ulid_two_low.eq(&ulid_one_low), false);
+        assert!(!ulid_one_low.eq(&ulid_two_low));
+        assert!(!ulid_two_low.eq(&ulid_one_low));
         assert_eq!(ulid_one_low.cmp(&ulid_two_low), Ordering::Less);
         assert_eq!(ulid_two_low.cmp(&ulid_one_low), Ordering::Greater);
 
         assert_ne!(ulid_one_low, ulid_one_high);
         assert_ne!(ulid_one_high, ulid_one_low);
-        assert_eq!(ulid_one_low.eq(&ulid_one_high), false);
-        assert_eq!(ulid_one_high.eq(&ulid_one_low), false);
+        assert!(!ulid_one_low.eq(&ulid_one_high));
+        assert!(!ulid_one_high.eq(&ulid_one_low));
         assert_eq!(ulid_one_low.cmp(&ulid_one_high), Ordering::Less);
         assert_eq!(ulid_one_high.cmp(&ulid_one_low), Ordering::Greater);
     }
