@@ -5,7 +5,7 @@ os:
 - osx
 - windows
 rust:
-- 1.40.0
+- 1.41.0
 - stable
 - beta
 - nightly
@@ -23,9 +23,7 @@ after_script:
 script:
 - echo "Rust version $TRAVIS_RUST_VERSION"
 - cargo build --verbose
-- if [ $TRAVIS_RUST_VERSION != "1.40.0" ]; then
-    cargo clippy --verbose --all-targets --all-features -- -D warnings;
-  fi
+- cargo clippy --verbose --all-targets --all-features -- -D warnings
 - cargo fmt --all -- --check
 - cargo test --verbose --no-default-features
 - cargo test --verbose --no-default-features --features "rand"
