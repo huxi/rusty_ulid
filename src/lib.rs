@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT)
- * Copyright (c) 2018-2020 Joern Huxhorn
+ * Copyright (c) 2018-2021 Joern Huxhorn
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the “Software”), to deal
@@ -22,7 +22,7 @@
  */
 
 /*
- * Copyright 2018-2020 Joern Huxhorn
+ * Copyright 2018-2021 Joern Huxhorn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@
     unused_results,
     variant_size_differences
 )]
-#![deny(clippy::all)]
+#![warn(clippy::all)]
 //#![deny(clippy::pedantic)]
 #![forbid(unsafe_code)]
 #![allow(unknown_lints)]
@@ -190,7 +190,6 @@ pub use crate::crockford::DecodingError;
 /// Returns the number of non-leap milliseconds since January 1, 1970 0:00:00 UTC
 /// (aka "UNIX timestamp").
 #[cfg(all(feature = "rand", feature = "chrono"))]
-#[allow(clippy::cast_sign_loss)]
 fn unix_epoch_ms() -> u64 {
     let now: DateTime<Utc> = Utc::now();
 
@@ -708,8 +707,6 @@ impl Ulid {
     /// # Ok::<(), rusty_ulid::DecodingError>(())
     /// ```
     #[cfg(feature = "chrono")]
-    #[allow(clippy::cast_possible_wrap)]
-    #[allow(clippy::cast_possible_truncation)]
     #[must_use]
     pub fn datetime(&self) -> DateTime<Utc> {
         let timestamp = self.timestamp();
@@ -787,7 +784,6 @@ impl Ulid {
     /// assert_eq!(ulid.to_string(), "7ZZZZZZZZZZZZZZZZZZZZZZZZZ");
     /// ```
     #[allow(clippy::inherent_to_string_shadow_display)]
-    #[allow(clippy::wrong_self_convention)]
     // impl fmt::Display is using this method
     // https://github.com/rust-lang/rust-clippy/issues/4396
     #[must_use]
@@ -908,7 +904,6 @@ impl From<Ulid> for [u8; 16] {
     /// assert_eq!(bytes, expected_bytes);
     /// ```
     #[rustfmt::skip]
-    #[allow(clippy::cast_possible_truncation)]
     #[must_use]
     fn from(ulid: Ulid) -> Self {
         let value = ulid.value;
@@ -1024,7 +1019,6 @@ impl From<u128> for Ulid {
     ///
     /// assert_eq!(ulid, expected_ulid);
     /// ```
-    #[allow(clippy::cast_possible_truncation)]
     #[must_use]
     fn from(value: u128) -> Self {
         let value = ((value >> 64) as u64, (value & 0xFFFF_FFFF_FFFF_FFFF) as u64);

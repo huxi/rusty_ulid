@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT)
- * Copyright (c) 2018-2019 Joern Huxhorn
+ * Copyright (c) 2018-2021 Joern Huxhorn
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the “Software”), to deal
@@ -22,7 +22,7 @@
  */
 
 /*
- * Copyright 2018-2019 Joern Huxhorn
+ * Copyright 2018-2021 Joern Huxhorn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -354,7 +354,6 @@ pub fn parse_crockford_u128(input: &str) -> Result<u128, DecodingError> {
 ///
 /// assert_eq!(a_string, "7ZZZZZZZZZZZZZZZZZZZZZZZZZ");
 /// ```
-#[allow(clippy::cast_possible_truncation)]
 pub fn append_crockford_u64_tuple(value: (u64, u64), to_append_to: &mut String) {
     to_append_to.push(ENCODING_DIGITS[(value.0 >> 61) as usize]);
     to_append_to.push(ENCODING_DIGITS[((value.0 >> 56) & MASK_U64) as usize]);
