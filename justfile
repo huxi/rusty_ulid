@@ -18,7 +18,7 @@ build toolchain:
 
 # perform a build for every supported toolchain
 all:
-    just build "+1.40.0"
+    just build "+1.41.0"
     just build "+stable"
     just build "+beta"
     just build "+nightly"
