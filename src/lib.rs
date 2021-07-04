@@ -786,6 +786,9 @@ impl Ulid {
     #[allow(clippy::inherent_to_string_shadow_display)]
     // impl fmt::Display is using this method
     // https://github.com/rust-lang/rust-clippy/issues/4396
+    #[allow(clippy::wrong_self_convention)]
+    // 1.53.0 still requires clippy::wrong_self_convention
+    // 1.54.0-beta fixes this false positive
     #[must_use]
     pub fn to_string(&self) -> String {
         let mut string = String::with_capacity(26);
