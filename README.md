@@ -63,7 +63,7 @@ use rusty_ulid::Ulid;
 let ulid: Ulid = "01CAT3X5Y5G9A62FH1FA6T9GVR".parse()?;
 
 let datetime = ulid.datetime();
-assert_eq!(datetime.to_string(), "2018-04-11 10:27:03.749 UTC");
+assert_eq!(datetime.to_string(), "2018-04-11 10:27:03.749 +00:00:00");
 # Ok::<(), rusty_ulid::DecodingError>(())
 ```
 
