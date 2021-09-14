@@ -22,11 +22,13 @@ categories = [
 # The default set of optional packages. Most people will want to use these
 # packages, but they are strictly optional.
 default = ["ulid-generation", "serde", "doc-comment"]
-ulid-generation = ["rand", "time"]
+ulid-generation = ["rand", "chrono"]
+ulid-generation-time = ["rand", "time"]
 
 [dependencies]
 rand = { version = "0.8", optional = true }
 time = { version = "0.3", optional = true }
+chrono = { version = "0.4", optional = true, default_features = false, features = ["std", "clock"] }
 serde = { version = "1", optional = true }
 doc-comment = { version = "0.3", optional = true }
 
