@@ -12,9 +12,12 @@ build toolchain:
     cargo {{ toolchain }} test --verbose --no-default-features
     cargo {{ toolchain }} test --verbose --no-default-features --features "rand"
     cargo {{ toolchain }} test --verbose --no-default-features --features "chrono"
+    cargo {{ toolchain }} test --verbose --no-default-features --features "time"
     cargo {{ toolchain }} test --verbose --no-default-features --features "serde"
     cargo {{ toolchain }} test --verbose --no-default-features --features "chrono rand serde"
+    cargo {{ toolchain }} test --verbose --no-default-features --features "time rand serde"
     cargo {{ toolchain }} test --verbose --no-default-features --features "chrono rand doc-comment serde"
+    cargo {{ toolchain }} test --verbose --no-default-features --features "time rand doc-comment serde"
 
 # perform a build for every supported toolchain
 all:

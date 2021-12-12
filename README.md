@@ -82,10 +82,12 @@ Run the benchmarks by executing `cargo bench`.
 
 You can switch the time library to use time-rs by setting up your dependencies by disabling default features and enabling `ulid-generation-time`
 
-```
+```ignore
 [dependencies]
 rusty_ulid = { version = "0.11", default-features = false, features = [ "ulid-generation-time", "serde", "doc-comment" ] }
 ```
+
+If both `chrono` and `time` are both enabled `chrono` will be used over `time`.
 
 ## Executable
 

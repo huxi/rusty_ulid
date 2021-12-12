@@ -170,9 +170,6 @@
 //! [ulidspec]: https://github.com/ulid/spec
 //! [crockford]: https://crockford.com/wrmg/base32.html
 
-#[cfg(any(all(feature = "ulid-generation", feature = "ulid-generation-time")))]
-compile_error!("only one of ['ulid-generation', 'ulid-generation-time'] can be enabled.");
-
 #[cfg(feature = "time")]
 use time::OffsetDateTime;
 
@@ -197,18 +194,18 @@ pub use crate::crockford::DecodingError;
 /// (aka "UNIX timestamp").
 #[cfg(all(feature = "rand", any(feature = "time", feature = "chrono")))]
 fn unix_epoch_ms() -> u64 {
+    #[cfg(feature = "chrono")]
+    {
+        let now: DateTime<Utc> = Utc::now();
+
+        return now.timestamp_millis() as u64;
+    }
+
     #[cfg(feature = "time")]
     {
         let now = OffsetDateTime::now_utc();
 
         return now.unix_timestamp() as u64 * 1_000 + now.millisecond() as u64;
-    }
-
-    #[cfg(feature = "chrono")]
-    {
-        let now: DateTime<Utc> = Utc::now();
-
-        now.timestamp_millis() as u64
     }
 }
 
@@ -299,7 +296,7 @@ impl Ulid {
     /// # Panics
     ///
     /// Panics if called after `+10889-08-02T05:31:50.655Z`.
-    #[cfg(all(feature = "rand", feature = "time"))]
+    #[cfg(all(feature = "rand", any(feature = "chrono", feature = "time")))]
     #[must_use]
     pub fn next_monotonic(previous_ulid: Self) -> Self {
         Self::next_monotonic_from_timestamp_with_rng(
@@ -329,7 +326,7 @@ impl Ulid {
     /// # Panics
     ///
     /// Panics if called after `+10889-08-02T05:31:50.655Z`.
-    #[cfg(all(feature = "rand", feature = "time"))]
+    #[cfg(all(feature = "rand", any(feature = "chrono", feature = "time")))]
     #[must_use]
     pub fn next_strictly_monotonic(previous_ulid: Self) -> Option<Self> {
         Self::next_strictly_monotonic_from_timestamp_with_rng(
@@ -723,6 +720,7 @@ impl Ulid {
     /// # Ok::<(), rusty_ulid::DecodingError>(())
     /// ```
     #[cfg(feature = "chrono")]
+    #[must_use]
     pub fn datetime(&self) -> DateTime<Utc> {
         let timestamp = self.timestamp();
         let seconds: i64 = (timestamp / 1000) as i64;
@@ -740,13 +738,13 @@ impl Ulid {
     /// use std::str::FromStr;
     ///
     /// let ulid = Ulid::from_str("01CAH7NXGRDJNE9B1NY7PQGYV7")?;
-    /// let datetime = ulid.datetime();
+    /// let datetime = ulid.offsetdatetime();
     ///
     /// assert_eq!(datetime.to_string(), "2018-04-07 23:39:50.168 +00:00:00");
     /// # Ok::<(), rusty_ulid::DecodingError>(())
     /// ```
     #[cfg(feature = "time")]
-    pub fn datetime(&self) -> OffsetDateTime {
+    pub fn offsetdatetime(&self) -> OffsetDateTime {
         OffsetDateTime::from_unix_timestamp_nanos((self.timestamp() * 1_000_000) as i128)
             .expect("invalid or out-of-range datetime")
     }
