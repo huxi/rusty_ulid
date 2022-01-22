@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT)
- * Copyright (c) 2018-2021 Joern Huxhorn
+ * Copyright (c) 2018-2022 Joern Huxhorn
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the “Software”), to deal
@@ -22,7 +22,7 @@
  */
 
 /*
- * Copyright 2018-2021 Joern Huxhorn
+ * Copyright 2018-2022 Joern Huxhorn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@
  * limitations under the License.
  */
 
-#![doc(html_root_url = "https://docs.rs/rusty_ulid/0.11.0")]
+#![doc(html_root_url = "https://docs.rs/rusty_ulid/1.0.0")]
 #![deny(
     anonymous_parameters,
     bare_trait_objects,
