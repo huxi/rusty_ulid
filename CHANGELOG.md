@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased][unreleased]
+### Added
+- optionally use `time` instead of `chrono`. Thanks to [tyhi](https://github.com/tyhi) for the contribution!
+### Changed
+- minimum checked Rust version is now 1.58
+- `cargo update`
+
 
 ## [0.11.0] - 2021-07-04
 ### Changed

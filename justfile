@@ -4,6 +4,7 @@ default: (build "")
 # performs a build with the given toolchain
 build toolchain:
     cargo {{ toolchain }} --version
+    cargo {{ toolchain }} clean
     cargo {{ toolchain }} build --verbose
     cargo {{ toolchain }} clippy --verbose --all-targets --all-features -- -D warnings
     cargo {{ toolchain }} fmt --all -- --check
@@ -18,10 +19,11 @@ build toolchain:
     cargo {{ toolchain }} test --verbose --no-default-features --features "time rand serde"
     cargo {{ toolchain }} test --verbose --no-default-features --features "chrono rand doc-comment serde"
     cargo {{ toolchain }} test --verbose --no-default-features --features "time rand doc-comment serde"
+    cargo {{ toolchain }} test --verbose --no-default-features --features "chrono time rand doc-comment serde"
 
 # perform a build for every supported toolchain
 all:
-    just build "+1.41.0"
+    #just build "+1.41.0"
     just build "+stable"
     just build "+beta"
     just build "+nightly"
