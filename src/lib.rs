@@ -170,6 +170,9 @@
 //! [ulidspec]: https://github.com/ulid/spec
 //! [crockford]: https://crockford.com/wrmg/base32.html
 
+#[cfg(feature = "time")]
+use time::OffsetDateTime;
+
 #[cfg(feature = "chrono")]
 use chrono::prelude::{DateTime, TimeZone, Utc};
 
@@ -189,11 +192,21 @@ pub use crate::crockford::DecodingError;
 
 /// Returns the number of non-leap milliseconds since January 1, 1970 0:00:00 UTC
 /// (aka "UNIX timestamp").
-#[cfg(all(feature = "rand", feature = "chrono"))]
+#[cfg(all(feature = "rand", any(feature = "time", feature = "chrono")))]
 fn unix_epoch_ms() -> u64 {
-    let now: DateTime<Utc> = Utc::now();
+    #[cfg(feature = "chrono")]
+    {
+        let now: DateTime<Utc> = Utc::now();
 
-    now.timestamp_millis() as u64
+        return now.timestamp_millis() as u64;
+    }
+
+    #[cfg(feature = "time")]
+    {
+        let now = OffsetDateTime::now_utc();
+
+        return now.unix_timestamp() as u64 * 1_000 + now.millisecond() as u64;
+    }
 }
 
 /// Returns a new ULID string.
@@ -208,7 +221,7 @@ fn unix_epoch_ms() -> u64 {
 /// // every ulid has exactly 26 characters
 /// assert_eq!(ulid_string.len(), 26);
 /// ```
-#[cfg(all(feature = "rand", feature = "chrono"))]
+#[cfg(all(feature = "rand", any(feature = "chrono", feature = "time")))]
 #[must_use]
 pub fn generate_ulid_string() -> String {
     Ulid::generate().to_string()
@@ -226,7 +239,7 @@ pub fn generate_ulid_string() -> String {
 /// // a binary ulid has exactly 16 bytes
 /// assert_eq!(ulid_bytes.len(), 16);
 /// ```
-#[cfg(all(feature = "rand", feature = "chrono"))]
+#[cfg(all(feature = "rand", any(feature = "chrono", feature = "time")))]
 #[must_use]
 pub fn generate_ulid_bytes() -> [u8; 16] {
     Ulid::generate().into()
@@ -258,7 +271,7 @@ impl Ulid {
     /// # Panics
     ///
     /// Panics if called after `+10889-08-02T05:31:50.655Z`.
-    #[cfg(all(feature = "rand", feature = "chrono"))]
+    #[cfg(all(feature = "rand", any(feature = "chrono", feature = "time")))]
     #[must_use]
     pub fn generate() -> Self {
         Self::from_timestamp_with_rng(unix_epoch_ms(), &mut rand::thread_rng())
@@ -283,7 +296,7 @@ impl Ulid {
     /// # Panics
     ///
     /// Panics if called after `+10889-08-02T05:31:50.655Z`.
-    #[cfg(all(feature = "rand", feature = "chrono"))]
+    #[cfg(all(feature = "rand", any(feature = "chrono", feature = "time")))]
     #[must_use]
     pub fn next_monotonic(previous_ulid: Self) -> Self {
         Self::next_monotonic_from_timestamp_with_rng(
@@ -313,7 +326,7 @@ impl Ulid {
     /// # Panics
     ///
     /// Panics if called after `+10889-08-02T05:31:50.655Z`.
-    #[cfg(all(feature = "rand", feature = "chrono"))]
+    #[cfg(all(feature = "rand", any(feature = "chrono", feature = "time")))]
     #[must_use]
     pub fn next_strictly_monotonic(previous_ulid: Self) -> Option<Self> {
         Self::next_strictly_monotonic_from_timestamp_with_rng(
@@ -714,6 +727,26 @@ impl Ulid {
         let nanos: u32 = ((timestamp % 1000) * 1_000_000) as u32;
 
         Utc.timestamp(seconds, nanos)
+    }
+
+    /// Returns the timestamp of this ULID as a `OffsetDateTime`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rusty_ulid::Ulid;
+    /// use std::str::FromStr;
+    ///
+    /// let ulid = Ulid::from_str("01CAH7NXGRDJNE9B1NY7PQGYV7")?;
+    /// let datetime = ulid.offsetdatetime();
+    ///
+    /// assert_eq!(datetime.to_string(), "2018-04-07 23:39:50.168 +00:00:00");
+    /// # Ok::<(), rusty_ulid::DecodingError>(())
+    /// ```
+    #[cfg(feature = "time")]
+    pub fn offsetdatetime(&self) -> OffsetDateTime {
+        OffsetDateTime::from_unix_timestamp_nanos((self.timestamp() * 1_000_000) as i128)
+            .expect("invalid or out-of-range datetime")
     }
 
     /// Returns a new ULID with the random part incremented by one.

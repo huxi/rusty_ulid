@@ -23,6 +23,7 @@ Take a look at the [changelog][changelog] for a detailed list of all changes.
 - conversion to and from `(u64, u64)`.
 - conversion to and from `u128`.
 - [serde](https://crates.io/crates/serde) support for both human-readable and binary encoding.
+- optional of using [time](https://crates.io/crates/time) instead of chrono via use of `ulid-generation-time` feature.
 
 ## Quickstart
 
@@ -76,6 +77,17 @@ returns `None` instead.
 ## Benchmark
 
 Run the benchmarks by executing `cargo bench`.
+
+## Switch to time-rs
+
+You can switch the time library to use time-rs by setting up your dependencies by disabling default features and enabling `ulid-generation-time`
+
+```ignore
+[dependencies]
+rusty_ulid = { version = "0.11", default-features = false, features = [ "ulid-generation-time", "serde", "doc-comment" ] }
+```
+
+If both `chrono` and `time` are both enabled `chrono` will be used over `time`.
 
 ## Executable
 
