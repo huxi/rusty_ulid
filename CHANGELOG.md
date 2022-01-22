@@ -9,9 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - optionally use `time` instead of `chrono`. Thanks to [tyhi](https://github.com/tyhi) for the contribution!
 ### Changed
-- minimum checked Rust version is now 1.58
+- minimum supported Rust version is now 1.56
 - `cargo update`
-
+- edition = “2021”
 
 ## [0.11.0] - 2021-07-04
 ### Changed
