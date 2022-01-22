@@ -198,14 +198,14 @@ fn unix_epoch_ms() -> u64 {
     {
         let now: DateTime<Utc> = Utc::now();
 
-        return now.timestamp_millis() as u64;
+        now.timestamp_millis() as u64
     }
 
-    #[cfg(feature = "time")]
+    #[cfg(all(feature = "time", not(feature = "chrono")))]
     {
         let now = OffsetDateTime::now_utc();
 
-        return now.unix_timestamp() as u64 * 1_000 + now.millisecond() as u64;
+        now.unix_timestamp() as u64 * 1_000 + now.millisecond() as u64
     }
 }
 
