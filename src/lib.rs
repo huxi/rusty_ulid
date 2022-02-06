@@ -1590,7 +1590,7 @@ mod tests {
     }
 }
 
-#[cfg(all(feature = "doc-comment", feature = "rand", feature = "chrono"))]
+#[cfg(all(doctest, feature = "rand", feature = "chrono"))]
 mod doc_tests {
     use doc_comment::doctest;
     doctest!("../README.md", readme);

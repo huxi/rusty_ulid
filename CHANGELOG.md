@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased][unreleased]
+### Changed
+- moved `doc-comment` to `[dev-dependencies]` by using `cfg(doctest)` (see [cfg(doctest) is stable and you should use it](https://blog.guillaume-gomez.fr/articles/2020-03-07+cfg%28doctest%29+is+stable+and+you+should+use+it))
+- `cargo update`
 
 ## [1.0.0] - 2022-01-22
 ### Added

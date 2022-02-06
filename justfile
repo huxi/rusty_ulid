@@ -17,9 +17,7 @@ build toolchain:
     cargo {{ toolchain }} test --verbose --no-default-features --features "serde"
     cargo {{ toolchain }} test --verbose --no-default-features --features "chrono rand serde"
     cargo {{ toolchain }} test --verbose --no-default-features --features "time rand serde"
-    cargo {{ toolchain }} test --verbose --no-default-features --features "chrono rand doc-comment serde"
-    cargo {{ toolchain }} test --verbose --no-default-features --features "time rand doc-comment serde"
-    cargo {{ toolchain }} test --verbose --no-default-features --features "chrono time rand doc-comment serde"
+    cargo {{ toolchain }} test --verbose --no-default-features --features "chrono time rand serde"
 
 # perform a build for every supported toolchain
 all:
