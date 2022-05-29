@@ -9,6 +9,7 @@ repository = "https://github.com/huxi/rusty_ulid"
 license = "MIT/Apache-2.0"
 readme = "README.md"
 edition = "2021"
+rust-version = "1.56"
 
 keywords = ["ulid", "uuid", "sortable", "identifier"]
 categories = [
