@@ -108,7 +108,7 @@ static DECODING_DIGITS: [Option<u8>; 123] = [
 /// Error that can occur while decoding a [crockford Base32][crockford] string.
 ///
 /// [crockford]: https://crockford.com/wrmg/base32.html
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum DecodingError {
     /// The length of the parsed string or given slice of bytes does not conform to requirements.
     InvalidLength,
