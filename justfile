@@ -25,3 +25,7 @@ all:
     just build "+stable"
     just build "+beta"
     just build "+nightly"
+
+# perform a build using Minimum Supported Rust Version toolchain
+msrv:
+    just build "+1.56.0"
