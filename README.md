@@ -78,16 +78,22 @@ returns `None` instead.
 
 Run the benchmarks by executing `cargo bench`.
 
-## Switch to time-rs
+## Choosing the right optional features
 
-You can switch the time library to use time-rs by setting up your dependencies by disabling default features and enabling `ulid-generation-time`
+Parsing and handling ULIDs does not require any dependencies.
+
+Generating ULIDs requires the `rand` crate as well as either the `time` or the `chrono` crate. If both `time` and `chrono` are enabled, the `time` crate will be used to obtain the current time.
+
+The `serde` dependency is necessary to enable `serde` support.
+
+The following dependencies are enabled by default: `["rand", "time", "serde"]`
+
+You can change this by disabling `default-features` and defining the enabled features explicitly like this:
 
 ```ignore
 [dependencies]
-rusty_ulid = { version = "0.11", default-features = false, features = [ "ulid-generation-time", "serde", "doc-comment" ] }
+rusty_ulid = { version = "1", default-features = false, features = ["rand", "chrono", "serde"] }
 ```
-
-If both `chrono` and `time` are both enabled `chrono` will be used over `time`.
 
 ## Executable
 
@@ -107,7 +113,8 @@ Calling the executable with `-v` or `--verbose` generates a ULID and prints its 
 ```console
 $ rusty_ulid -v
 01CB2EMMMV8P51SCR9ZH8K64CX
-2018-04-14 16:08:33.691 UTC
+2018-04-14T16:08:33.691Z
+
 ```
 
 Calling the executable with any number of ULIDs checks them for validity and returns `0` if they are all fine...
@@ -132,12 +139,13 @@ In addition to that, `-v` or `--verbose` will print the ULIDs with their respect
 ```console
 $ rusty_ulid -v 01CB2EM1J4EMBWRBJK877TM17S foo 01CB2EMMMV8P51SCR9ZH8K64CX
 01CB2EM1J4EMBWRBJK877TM17S
-2018-04-14 16:08:14.148 UTC
+2018-04-14T16:08:14.148Z
 
 01CB2EMMMV8P51SCR9ZH8K64CX
-2018-04-14 16:08:33.691 UTC
+2018-04-14T16:08:33.691Z
 
 Invalid ULID strings: ["foo"]
+
 $ echo $?
 1
 ```

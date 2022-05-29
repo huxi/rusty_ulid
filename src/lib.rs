@@ -190,22 +190,21 @@ use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 pub mod crockford;
 pub use crate::crockford::DecodingError;
 
-/// Returns the number of non-leap milliseconds since January 1, 1970 0:00:00 UTC
+/// Returns the number of non-leap milliseconds since 1970-01-01T00:00:00Z
 /// (aka "UNIX timestamp").
-#[cfg(all(feature = "rand", any(feature = "time", feature = "chrono")))]
+#[cfg(all(feature = "rand", any(feature = "chrono", feature = "time")))]
 fn unix_epoch_ms() -> u64 {
-    #[cfg(feature = "chrono")]
-    {
-        let now: DateTime<Utc> = Utc::now();
-
-        now.timestamp_millis() as u64
-    }
-
-    #[cfg(all(feature = "time", not(feature = "chrono")))]
+    #[cfg(feature = "time")]
     {
         let now = OffsetDateTime::now_utc();
 
         now.unix_timestamp() as u64 * 1_000 + now.millisecond() as u64
+    }
+    #[cfg(all(feature = "chrono", not(feature = "time")))]
+    {
+        let now: DateTime<Utc> = Utc::now();
+
+        now.timestamp_millis() as u64
     }
 }
 
@@ -744,6 +743,7 @@ impl Ulid {
     /// # Ok::<(), rusty_ulid::DecodingError>(())
     /// ```
     #[cfg(feature = "time")]
+    #[must_use]
     pub fn offsetdatetime(&self) -> OffsetDateTime {
         OffsetDateTime::from_unix_timestamp_nanos((self.timestamp() * 1_000_000) as i128)
             .expect("invalid or out-of-range datetime")

@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - moved `doc-comment` to `[dev-dependencies]` by using `cfg(doctest)` (see [cfg(doctest) is stable and you should use it](https://blog.guillaume-gomez.fr/articles/2020-03-07+cfg%28doctest%29+is+stable+and+you+should+use+it))
 - `cargo update`
+- switched default dependency from `chrono` to `time`
+- prefer `time` over `chrono` to obtain current time if both dependencies are enabled.
+- added `#[must_use]` to `ulid.offsetdatetime()`.
+- fix executable to work with either `chrono` or `time`.
+
+### Removed
+- `ulid-generation` and `ulid-generation-time` dependency sets
 
 ## [1.0.0] - 2022-01-22
 ### Added
