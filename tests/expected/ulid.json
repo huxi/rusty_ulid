@@ -1,0 +1,11 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "[ULID](https://github.com/ulid/spec)",
+	"description": "[Universally Unique Lexicographically Sortable Identifier](https://github.com/ulid/spec)",
+    "type": "string",
+    "format": "ulid",
+	"examples": [
+		"01ARZ3NDEKTSV4RRFFQ69G5FAV",
+		"01BX5ZZKBKACTAV9WEVGEMMVS0"
+	]
+}

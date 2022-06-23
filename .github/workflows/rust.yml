@@ -35,7 +35,7 @@ jobs:
       run: cargo test --verbose
     - name: Run tests (no default features)
       run: cargo test --verbose --no-default-features
-    - name: Run tests (all features) [chrono time rand serde]
+    - name: Run tests (all features) [chrono time rand serde schemars]
       run: cargo test --verbose --no-default-features --features "chrono time rand serde"
     - name: Run tests [rand]
       run: cargo test --verbose --no-default-features --features "rand"
@@ -45,6 +45,8 @@ jobs:
       run: cargo test --verbose --no-default-features --features "time"
     - name: Run tests [serde]
       run: cargo test --verbose --no-default-features --features "serde"
+    - name: Run tests [schemars]
+      run: cargo test --verbose --no-default-features --features "schemars"
     - name: Run tests [chrono rand serde]
       run: cargo test --verbose --no-default-features --features "chrono rand serde"
     - name: Run tests [time rand serde]
