@@ -184,6 +184,8 @@ use std::str::FromStr;
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 #[cfg(feature = "schemars")]
 mod schemars;
+#[cfg(feature = "rocket")]
+mod rocket_;
 
 /// Contains functions for encoding and decoding of
 /// [crockford Base32][crockford] strings.
