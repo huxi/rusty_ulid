@@ -17,7 +17,7 @@ jobs:
         os: [macos-latest, windows-latest, ubuntu-latest]
         toolchain:
           - stable
-          - 1.56.0
+          - 1.56.1
           - beta
           - nightly
     steps:
