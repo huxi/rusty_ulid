@@ -64,9 +64,9 @@
 //!
 
 use rocket::form::{self, FromFormField, ValueField};
-use rocket::request::FromParam;
-use rocket::http::uri::fmt::{Part, UriDisplay, Formatter};
 use rocket::http::impl_from_uri_param_identity;
+use rocket::http::uri::fmt::{Formatter, Part, UriDisplay};
+use rocket::request::FromParam;
 
 /// Error returned on [`FromParam`] or [`FromFormField`] failure.
 ///
@@ -93,7 +93,7 @@ impl<'v> FromFormField<'v> for Ulid {
 }
 
 /// This implementation is identical to the `Display` implementation.
-impl<P: Part> UriDisplay<P> for Ulid  {
+impl<P: Part> UriDisplay<P> for Ulid {
     #[inline(always)]
     fn fmt(&self, f: &mut Formatter<'_, P>) -> std::fmt::Result {
         use std::fmt::Write;
