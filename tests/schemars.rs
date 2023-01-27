@@ -9,6 +9,12 @@ fn ulid() -> TestResult {
     test_default_generated_schema::<Ulid>("ulid")
 }
 
+#[test]
+fn basics() {
+    assert!(!Ulid::is_referenceable());
+    assert_eq!(Ulid::schema_name(), "Ulid");
+}
+
 type TestResult = Result<(), Box<dyn Error>>;
 
 #[allow(dead_code)] // https://github.com/rust-lang/rust/issues/46379
