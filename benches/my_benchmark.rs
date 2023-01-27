@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT)
- * Copyright (c) 2018-2019 Joern Huxhorn
+ * Copyright (c) 2018-2023 Joern Huxhorn
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the “Software”), to deal
@@ -22,7 +22,7 @@
  */
 
 /*
- * Copyright 2018-2019 Joern Huxhorn
+ * Copyright 2018-2023 Joern Huxhorn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ fn criterion_benchmark(c: &mut Criterion) {
             let value = Ulid::generate();
             let mut string = String::with_capacity(26);
             string
-                .write_fmt(format_args!("{}", value))
+                .write_fmt(format_args!("{value}"))
                 .expect("a Display implementation returned an error unexpectedly");
             string
         })

@@ -18,7 +18,7 @@ pub fn test_default_generated_schema<T: JsonSchema>(file: &str) -> TestResult {
 }
 
 fn test_schema(actual: &RootSchema, file: &str) -> TestResult {
-    let expected_json = match fs::read_to_string(format!("tests/expected/{}.json", file)) {
+    let expected_json = match fs::read_to_string(format!("tests/expected/{file}.json")) {
         Ok(j) => j,
         Err(e) => {
             write_actual_to_file(actual, file)?;
@@ -37,6 +37,6 @@ fn test_schema(actual: &RootSchema, file: &str) -> TestResult {
 
 fn write_actual_to_file(schema: &RootSchema, file: &str) -> TestResult {
     let actual_json = serde_json::to_string_pretty(&schema)?;
-    fs::write(format!("tests/actual/{}.json", file), actual_json)?;
+    fs::write(format!("tests/actual/{file}.json"), actual_json)?;
     Ok(())
 }

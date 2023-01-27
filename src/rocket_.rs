@@ -7,7 +7,7 @@
 //!
 //! ```toml
 //! [dependencies.rusty_ulid]
-//! version = "1"
+//! version = "2"
 //! features = ["rocket"]
 //! ```
 //!
@@ -97,7 +97,7 @@ impl<P: Part> UriDisplay<P> for Ulid {
     #[inline(always)]
     fn fmt(&self, f: &mut Formatter<'_, P>) -> std::fmt::Result {
         use std::fmt::Write;
-        write!(f, "{}", self)
+        write!(f, "{self}")
     }
 }
 

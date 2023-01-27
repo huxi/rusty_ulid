@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT)
- * Copyright (c) 2018 Joern Huxhorn
+ * Copyright (c) 2018-2023 Joern Huxhorn
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the “Software”), to deal
@@ -22,7 +22,7 @@
  */
 
 /*
- * Copyright 2018 Joern Huxhorn
+ * Copyright 2018-2023 Joern Huxhorn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,8 +90,7 @@ fn print(ulid: &Ulid, verbose: bool) {
             use chrono::SecondsFormat;
 
             println!(
-                "{}\n{}\n",
-                ulid,
+                "{ulid}\n{}\n",
                 ulid.datetime().to_rfc3339_opts(SecondsFormat::Millis, true)
             );
         }
@@ -100,13 +99,12 @@ fn print(ulid: &Ulid, verbose: bool) {
             use time::format_description::well_known::Rfc3339;
 
             println!(
-                "{}\n{}\n",
-                ulid,
+                "{ulid}\n{}\n",
                 ulid.offsetdatetime().format(&Rfc3339).unwrap()
             );
         }
     } else {
-        println!("{}", ulid);
+        println!("{ulid}");
     }
 }
 
@@ -130,12 +128,12 @@ fn main_with_args_and_return_value(args: Vec<String>) -> i32 {
     }
 
     if version {
-        println!("rusty_ulid {}", VERSION);
+        println!("rusty_ulid {VERSION}");
         return 0;
     }
 
     if help {
-        println!("{}", HELP);
+        println!("{HELP}");
         return 0;
     }
 
@@ -157,7 +155,7 @@ fn main_with_args_and_return_value(args: Vec<String>) -> i32 {
     }
 
     if !broken.is_empty() {
-        eprintln!("Invalid ULID strings: {:?}", broken);
+        eprintln!("Invalid ULID strings: {broken:?}");
         return 1;
     }
 

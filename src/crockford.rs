@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT)
- * Copyright (c) 2018-2021 Joern Huxhorn
+ * Copyright (c) 2018-2023 Joern Huxhorn
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the “Software”), to deal
@@ -22,7 +22,7 @@
  */
 
 /*
- * Copyright 2018-2021 Joern Huxhorn
+ * Copyright 2018-2023 Joern Huxhorn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,7 +129,7 @@ impl fmt::Display for DecodingError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         match *self {
             Self::InvalidLength => write!(f, "invalid length"),
-            Self::InvalidChar(c) => write!(f, "invalid character '{}'", c),
+            Self::InvalidChar(c) => write!(f, "invalid character '{c}'"),
             Self::DataTypeOverflow => write!(f, "data type overflow"),
         }
     }
@@ -804,20 +804,20 @@ mod tests {
     fn single_append_crockford_u128(value: u128, expected_result: &str) {
         let mut a_string = String::new();
         append_crockford_u128(value, &mut a_string);
-        println!("{}", a_string);
+        println!("{a_string}");
         assert_eq!(expected_result, a_string);
     }
 
     fn single_parse_crockford_u128(value: &str, expected_result: Result<u128, DecodingError>) {
         let result = parse_crockford_u128(value);
-        println!("parse_crockford_u128({}) => {:?}", value, result);
+        println!("parse_crockford_u128({value}) => {result:?}");
         assert_eq!(result, expected_result);
     }
 
     fn single_append_crockford_u64_tuple(value: (u64, u64), expected_result: &str) {
         let mut a_string = String::new();
         append_crockford_u64_tuple(value, &mut a_string);
-        println!("{}", a_string);
+        println!("{a_string}");
         assert_eq!(expected_result, a_string);
     }
 
@@ -830,7 +830,7 @@ mod tests {
     }
 
     fn single_decoding_error_display_trait(error: DecodingError, expected_result: &str) {
-        let result = format!("{}", error);
+        let result = format!("{error}");
         assert_eq!(result, expected_result)
     }
 }

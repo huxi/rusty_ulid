@@ -10,20 +10,22 @@
 
 This is a Rust implementation of the [ULID][ulid] Universally Unique Lexicographically Sortable Identifiers.
 
-This crate works with **Rust 1.56.1 or later**.
+This crate works with **Rust 1.60 or later**.
 
 Take a look at the [changelog][changelog] for a detailed list of all changes.
 
 ## Features
 - lenient parsing of ULID strings as specified in [Crockford Base32 Encoding][crockford].
 - straight-forward creation of string and binary ULIDs.
-- optional support for monotonic ULIDs.
+- support for monotonic ULIDs.
 - conversion from `&[u8]`.
 - conversion to and from `[u8; 16]`.
 - conversion to and from `(u64, u64)`.
 - conversion to and from `u128`.
-- [serde](https://crates.io/crates/serde) support for both human-readable and binary encoding.
-- optional of using [time](https://crates.io/crates/time) instead of chrono via use of `ulid-generation-time` feature.
+- optional [serde](https://crates.io/crates/serde) support for both human-readable and binary encoding.
+- optional use of either [chrono](https://crates.io/crates/chrono) or [time](https://crates.io/crates/time).
+- optional [rocket](https://crates.io/crates/rocket) path/query parameter and form value parsing support.
+- optional [schemars](https://crates.io/crates/schemars) `JsonSchema` trait impl for `Ulid`.
 
 ## Quickstart
 

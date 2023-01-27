@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT)
- * Copyright (c) 2018-2022 Joern Huxhorn
+ * Copyright (c) 2018-2023 Joern Huxhorn
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the “Software”), to deal
@@ -22,7 +22,7 @@
  */
 
 /*
- * Copyright 2018-2022 Joern Huxhorn
+ * Copyright 2018-2023 Joern Huxhorn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@
  * limitations under the License.
  */
 
-#![doc(html_root_url = "https://docs.rs/rusty_ulid/1.0.0")]
+#![doc(html_root_url = "https://docs.rs/rusty_ulid/2.0.0")]
 #![deny(
     anonymous_parameters,
     bare_trait_objects,
@@ -725,11 +725,12 @@ impl Ulid {
     #[cfg(feature = "chrono")]
     #[must_use]
     pub fn datetime(&self) -> DateTime<Utc> {
-        let timestamp = self.timestamp();
-        let seconds: i64 = (timestamp / 1000) as i64;
-        let nanos: u32 = ((timestamp % 1000) * 1_000_000) as u32;
+        use chrono::LocalResult;
 
-        Utc.timestamp(seconds, nanos)
+        match Utc.timestamp_millis_opt(self.timestamp() as i64) {
+            LocalResult::Single(dt) => dt,
+            _ => panic!("Incorrect timestamp_millis"),
+        }
     }
 
     /// Returns the timestamp of this ULID as a `OffsetDateTime`.
