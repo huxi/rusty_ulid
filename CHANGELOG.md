@@ -56,7 +56,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `cargo update`
 
 ### Fixed
-- [`#![deny(warnings)]`](https://github.com/rust-unofficial/patterns/blob/master/anti_patterns/deny-warnings.md) anti-pattern
+- [`#![deny(warnings)]`](https://github.com/rust-unofficial/patterns/blob/main/anti_patterns/deny-warnings.md) anti-pattern
 
 ## [0.9.2] - 2020-01-10
 ### Changed
