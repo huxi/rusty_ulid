@@ -94,7 +94,7 @@ You can change this by disabling `default-features` and defining the enabled fea
 
 ```ignore
 [dependencies]
-rusty_ulid = { version = "1", default-features = false, features = ["rand", "chrono", "serde"] }
+rusty_ulid = { version = "2", default-features = false, features = ["rand", "chrono", "serde"] }
 ```
 
 ## Executable
