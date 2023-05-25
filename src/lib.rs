@@ -1234,6 +1234,113 @@ impl<'de> Deserialize<'de> for Ulid {
     }
 }
 
+#[cfg(all(doctest, feature = "rand", feature = "chrono"))]
+mod doc_tests {
+    use doc_comment::doctest;
+    doctest!("../README.md", readme);
+}
+
+#[cfg(all(test, feature = "serde"))]
+mod serde_tests {
+    use super::*;
+    use serde_test::{assert_de_tokens_error, assert_tokens, Compact, Readable, Token};
+
+    #[test]
+    fn test_serde_readable() {
+        use serde_test::Configure;
+
+        let ulid = Ulid::from_str("7ZZZZZZZZZZZZZZZZZZZZZZZZZ").unwrap();
+        assert_tokens(
+            &ulid.readable(),
+            &[Token::Str("7ZZZZZZZZZZZZZZZZZZZZZZZZZ")],
+        );
+
+        let ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
+        assert_tokens(
+            &ulid.readable(),
+            &[Token::Str("0H48SM8NB6EY49KANVSKEYXW0F")],
+        );
+    }
+
+    #[test]
+    fn test_serde_compact() {
+        use serde_test::Configure;
+
+        let ulid = Ulid::from_str("7ZZZZZZZZZZZZZZZZZZZZZZZZZ").unwrap();
+        assert_tokens(
+            &ulid.compact(),
+            &[Token::Bytes(&[
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF,
+            ])],
+        );
+
+        let ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
+        assert_tokens(
+            &ulid.compact(),
+            &[Token::Bytes(&[
+                0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE,
+                0xF0, 0x0F,
+            ])],
+        );
+    }
+
+    #[test]
+    fn test_de_readable_error() {
+        assert_de_tokens_error::<Readable<Ulid>>(
+            &[Token::Bytes(&[
+                0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE,
+                0xF0, 0x0F,
+            ])],
+            "invalid type: byte array, expected a ULID string",
+        );
+
+        assert_de_tokens_error::<Readable<Ulid>>(
+            &[Token::Str("0H48SM8NB6EY49KANUSKEYXW0F")],
+            "invalid character 'U'",
+        );
+
+        assert_de_tokens_error::<Readable<Ulid>>(
+            &[Token::Str("0H48SM8NB6EY49KANVSKEYXW0FF")],
+            "invalid length",
+        );
+
+        assert_de_tokens_error::<Readable<Ulid>>(
+            &[Token::Str("0H48SM8NB6EY49KANVSKEYXW0")],
+            "invalid length",
+        );
+
+        assert_de_tokens_error::<Readable<Ulid>>(
+            &[Token::Str("80000000000000000000000000")],
+            "data type overflow",
+        );
+    }
+
+    #[test]
+    fn test_de_compact_error() {
+        assert_de_tokens_error::<Compact<Ulid>>(
+            &[Token::Str("0H48SM8NB6EY49KANVSKEYXW0F")],
+            "invalid type: string \"0H48SM8NB6EY49KANVSKEYXW0F\", expected 16 ULID bytes",
+        );
+
+        assert_de_tokens_error::<Compact<Ulid>>(
+            &[Token::Bytes(&[
+                0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE,
+                0xF0, 0x0F, 0xFF,
+            ])],
+            "invalid length",
+        );
+
+        assert_de_tokens_error::<Compact<Ulid>>(
+            &[Token::Bytes(&[
+                0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE,
+                0xF0,
+            ])],
+            "invalid length",
+        );
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1592,112 +1699,5 @@ mod tests {
 
         assert_eq!(0, u128::from(ulid) & 0xFFFF_FFFF);
         assert_ne!(0, u128::from(ulid));
-    }
-}
-
-#[cfg(all(doctest, feature = "rand", feature = "chrono"))]
-mod doc_tests {
-    use doc_comment::doctest;
-    doctest!("../README.md", readme);
-}
-
-#[cfg(all(test, feature = "serde"))]
-mod serde_tests {
-    use super::*;
-    use serde_test::{assert_de_tokens_error, assert_tokens, Compact, Readable, Token};
-
-    #[test]
-    fn test_serde_readable() {
-        use serde_test::Configure;
-
-        let ulid = Ulid::from_str("7ZZZZZZZZZZZZZZZZZZZZZZZZZ").unwrap();
-        assert_tokens(
-            &ulid.readable(),
-            &[Token::Str("7ZZZZZZZZZZZZZZZZZZZZZZZZZ")],
-        );
-
-        let ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
-        assert_tokens(
-            &ulid.readable(),
-            &[Token::Str("0H48SM8NB6EY49KANVSKEYXW0F")],
-        );
-    }
-
-    #[test]
-    fn test_serde_compact() {
-        use serde_test::Configure;
-
-        let ulid = Ulid::from_str("7ZZZZZZZZZZZZZZZZZZZZZZZZZ").unwrap();
-        assert_tokens(
-            &ulid.compact(),
-            &[Token::Bytes(&[
-                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-                0xFF, 0xFF,
-            ])],
-        );
-
-        let ulid = Ulid::from(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F);
-        assert_tokens(
-            &ulid.compact(),
-            &[Token::Bytes(&[
-                0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE,
-                0xF0, 0x0F,
-            ])],
-        );
-    }
-
-    #[test]
-    fn test_de_readable_error() {
-        assert_de_tokens_error::<Readable<Ulid>>(
-            &[Token::Bytes(&[
-                0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE,
-                0xF0, 0x0F,
-            ])],
-            "invalid type: byte array, expected a ULID string",
-        );
-
-        assert_de_tokens_error::<Readable<Ulid>>(
-            &[Token::Str("0H48SM8NB6EY49KANUSKEYXW0F")],
-            "invalid character 'U'",
-        );
-
-        assert_de_tokens_error::<Readable<Ulid>>(
-            &[Token::Str("0H48SM8NB6EY49KANVSKEYXW0FF")],
-            "invalid length",
-        );
-
-        assert_de_tokens_error::<Readable<Ulid>>(
-            &[Token::Str("0H48SM8NB6EY49KANVSKEYXW0")],
-            "invalid length",
-        );
-
-        assert_de_tokens_error::<Readable<Ulid>>(
-            &[Token::Str("80000000000000000000000000")],
-            "data type overflow",
-        );
-    }
-
-    #[test]
-    fn test_de_compact_error() {
-        assert_de_tokens_error::<Compact<Ulid>>(
-            &[Token::Str("0H48SM8NB6EY49KANVSKEYXW0F")],
-            "invalid type: string \"0H48SM8NB6EY49KANVSKEYXW0F\", expected 16 ULID bytes",
-        );
-
-        assert_de_tokens_error::<Compact<Ulid>>(
-            &[Token::Bytes(&[
-                0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE,
-                0xF0, 0x0F, 0xFF,
-            ])],
-            "invalid length",
-        );
-
-        assert_de_tokens_error::<Compact<Ulid>>(
-            &[Token::Bytes(&[
-                0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE,
-                0xF0,
-            ])],
-            "invalid length",
-        );
     }
 }
