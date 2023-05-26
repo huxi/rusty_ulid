@@ -21,11 +21,11 @@ build toolchain:
 
 # perform a build for every supported toolchain
 all:
-    just build "+1.63.0"
+    just build "+1.65.0"
     just build "+stable"
     just build "+beta"
     just build "+nightly"
 
 # perform a build using Minimum Supported Rust Version toolchain
 msrv:
-    just build "+1.63.0"
+    just build "+1.65.0"

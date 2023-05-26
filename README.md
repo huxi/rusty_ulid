@@ -10,7 +10,7 @@
 
 This is a Rust implementation of the [ULID][ulid] Universally Unique Lexicographically Sortable Identifiers.
 
-This crate works with **Rust 1.63.0 or later**.
+This crate works with **Rust 1.65.0 or later**.
 
 Take a look at the [changelog][changelog] for a detailed list of all changes.
 
