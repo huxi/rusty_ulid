@@ -176,7 +176,6 @@ use time::OffsetDateTime;
 #[cfg(feature = "chrono")]
 use chrono::prelude::{DateTime, TimeZone, Utc};
 
-use std::convert::TryFrom;
 use std::fmt;
 use std::str::FromStr;
 
