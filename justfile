@@ -18,6 +18,7 @@ build toolchain:
     cargo {{ toolchain }} test --verbose --no-default-features --features "chrono rand serde"
     cargo {{ toolchain }} test --verbose --no-default-features --features "time rand serde"
     cargo {{ toolchain }} test --verbose --no-default-features --features "chrono time rand serde"
+    cargo {{ toolchain }} test --verbose --no-default-features --features "chrono time rand serde rocket"
 
 # perform a build for every supported toolchain
 all:
