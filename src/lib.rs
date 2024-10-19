@@ -1201,7 +1201,7 @@ impl<'de> Deserialize<'de> for Ulid {
         if deserializer.is_human_readable() {
             struct UlidStringVisitor;
 
-            impl<'vi> de::Visitor<'vi> for UlidStringVisitor {
+            impl de::Visitor<'_> for UlidStringVisitor {
                 type Value = Ulid;
 
                 fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -1217,7 +1217,7 @@ impl<'de> Deserialize<'de> for Ulid {
         } else {
             struct UlidBytesVisitor;
 
-            impl<'vi> de::Visitor<'vi> for UlidBytesVisitor {
+            impl de::Visitor<'_> for UlidBytesVisitor {
                 type Value = Ulid;
 
                 fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
