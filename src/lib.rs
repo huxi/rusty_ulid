@@ -365,7 +365,7 @@ impl Ulid {
             panic!("ULID does not support timestamps after +10889-08-02T05:31:50.655Z");
         }
 
-        let high = timestamp << 16 | u64::from(rng.gen::<u16>());
+        let high = (timestamp << 16) | u64::from(rng.gen::<u16>());
         let low = rng.gen::<u64>();
         let value = (high, low);
 
@@ -887,23 +887,23 @@ impl From<[u8; 16]> for Ulid {
     #[must_use]
     fn from(bytes: [u8; 16]) -> Self {
         #[rustfmt::skip]
-        let high = u64::from(bytes[0]) << 56
-            | u64::from(bytes[1]) << 48
-            | u64::from(bytes[2]) << 40
-            | u64::from(bytes[3]) << 32
-            | u64::from(bytes[4]) << 24
-            | u64::from(bytes[5]) << 16
-            | u64::from(bytes[6]) << 8
+        let high = (u64::from(bytes[0]) << 56)
+            | (u64::from(bytes[1]) << 48)
+            | (u64::from(bytes[2]) << 40)
+            | (u64::from(bytes[3]) << 32)
+            | (u64::from(bytes[4]) << 24)
+            | (u64::from(bytes[5]) << 16)
+            | (u64::from(bytes[6]) << 8)
             | u64::from(bytes[7]);
 
         #[rustfmt::skip]
-        let low = u64::from(bytes[8]) << 56
-            | u64::from(bytes[9]) << 48
-            | u64::from(bytes[10]) << 40
-            | u64::from(bytes[11]) << 32
-            | u64::from(bytes[12]) << 24
-            | u64::from(bytes[13]) << 16
-            | u64::from(bytes[14]) << 8
+        let low = (u64::from(bytes[8]) << 56)
+            | (u64::from(bytes[9]) << 48)
+            | (u64::from(bytes[10]) << 40)
+            | (u64::from(bytes[11]) << 32)
+            | (u64::from(bytes[12]) << 24)
+            | (u64::from(bytes[13]) << 16)
+            | (u64::from(bytes[14]) << 8)
             | u64::from(bytes[15]);
 
         let value = (high, low);
@@ -1094,7 +1094,7 @@ impl From<Ulid> for u128 {
     /// ```
     #[must_use]
     fn from(ulid: Ulid) -> Self {
-        Self::from(ulid.value.0) << 64 | Self::from(ulid.value.1)
+        (Self::from(ulid.value.0) << 64) | Self::from(ulid.value.1)
     }
 }
 
@@ -1159,23 +1159,23 @@ impl TryFrom<&[u8]> for Ulid {
         }
 
         #[rustfmt::skip]
-        let high = u64::from(bytes[0]) << 56
-            | u64::from(bytes[1]) << 48
-            | u64::from(bytes[2]) << 40
-            | u64::from(bytes[3]) << 32
-            | u64::from(bytes[4]) << 24
-            | u64::from(bytes[5]) << 16
-            | u64::from(bytes[6]) << 8
+        let high = (u64::from(bytes[0]) << 56)
+            | (u64::from(bytes[1]) << 48)
+            | (u64::from(bytes[2]) << 40)
+            | (u64::from(bytes[3]) << 32)
+            | (u64::from(bytes[4]) << 24)
+            | (u64::from(bytes[5]) << 16)
+            | (u64::from(bytes[6]) << 8)
             | u64::from(bytes[7]);
 
         #[rustfmt::skip]
-        let low = u64::from(bytes[8]) << 56
-            | u64::from(bytes[9]) << 48
-            | u64::from(bytes[10]) << 40
-            | u64::from(bytes[11]) << 32
-            | u64::from(bytes[12]) << 24
-            | u64::from(bytes[13]) << 16
-            | u64::from(bytes[14]) << 8
+        let low = (u64::from(bytes[8]) << 56)
+            | (u64::from(bytes[9]) << 48)
+            | (u64::from(bytes[10]) << 40)
+            | (u64::from(bytes[11]) << 32)
+            | (u64::from(bytes[12]) << 24)
+            | (u64::from(bytes[13]) << 16)
+            | (u64::from(bytes[14]) << 8)
             | u64::from(bytes[15]);
 
         let value = (high, low);
