@@ -638,10 +638,7 @@ mod tests {
         single_parse_crockford_u128("00000000000000ZZZZZZZZZZZZ", Ok(0xFFF_FFFF_FFFF_FFFF));
         single_parse_crockford_u128("0000000000000FZZZZZZZZZZZZ", Ok(0xFFFF_FFFF_FFFF_FFFF));
         single_parse_crockford_u128("0000000000000G000000000000", Ok(0x1_0000_0000_0000_0000));
-        single_parse_crockford_u128(
-            "7ZZZZZZZZZZZZZZZZZZZZZZZZZ",
-            Ok(0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF),
-        );
+
         single_parse_crockford_u128(
             "80000000000000000000000000",
             Err(DecodingError::DataTypeOverflow),
@@ -651,10 +648,30 @@ mod tests {
             "0000000000000000000000000U",
             Err(DecodingError::InvalidChar('U')),
         );
-
+        single_parse_crockford_u128(
+            "012345678🦀0123456789012",
+            Err(DecodingError::InvalidChar('🦀')),
+        );
+        single_parse_crockford_u128(
+            "1234567890123456789012345",
+            Err(DecodingError::InvalidLength),
+        );
         single_parse_crockford_u128(
             "123456789012345678901234567",
             Err(DecodingError::InvalidLength),
+        );
+
+        single_parse_crockford_u128(
+            "7ZZZZZZZZZZZZZZZZZZZZZZZZZ",
+            Ok(0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF),
+        );
+        single_parse_crockford_u128(
+            "0H48SM8NB6EY49KANVSKEYXW0F",
+            Ok(0x1122_3344_5566_7788_99AA_BBCC_DDEE_F00F),
+        );
+        single_parse_crockford_u128(
+            "7G1ZQDVK5VNACRGXV6AN2368GH",
+            Ok(0xF00F_EEDD_CCBB_AA99_8877_6655_4433_2211),
         );
     }
 
@@ -760,6 +777,10 @@ mod tests {
             "0000000000000000000000000U",
             Err(DecodingError::InvalidChar('U')),
         );
+        single_parse_crockford_u64_tuple(
+            "012345678🦀0123456789012",
+            Err(DecodingError::InvalidChar('🦀')),
+        );
 
         single_parse_crockford_u64_tuple(
             "1234567890123456789012345",
@@ -769,7 +790,6 @@ mod tests {
             "123456789012345678901234567",
             Err(DecodingError::InvalidLength),
         );
-        single_parse_crockford_u64_tuple("00000000000000000000000000", Ok((0, 0)));
         single_parse_crockford_u64_tuple(
             "7ZZZZZZZZZZZZZZZZZZZZZZZZZ",
             Ok((0xFFFF_FFFF_FFFF_FFFF, 0xFFFF_FFFF_FFFF_FFFF)),
@@ -781,6 +801,222 @@ mod tests {
         single_parse_crockford_u64_tuple(
             "7G1ZQDVK5VNACRGXV6AN2368GH",
             Ok((0xF00F_EEDD_CCBB_AA99, 0x8877_6655_4433_2211)),
+        );
+    }
+
+    #[test]
+    fn parse_crockford_u64_tuple_region_coverage() {
+        single_parse_crockford_u64_tuple(
+            "0000000000000000000000000U",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "000000000000000000000000U0",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "00000000000000000000000U00",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "0000000000000000000000U000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "000000000000000000000U0000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "00000000000000000000U00000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "0000000000000000000U000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "000000000000000000U0000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "00000000000000000U00000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "0000000000000000U000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "000000000000000U0000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "00000000000000U00000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "0000000000000U000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "000000000000U0000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "00000000000U00000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "0000000000U000000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "000000000U0000000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "00000000U00000000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "0000000U000000000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "000000U0000000000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "00000U00000000000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "0000U000000000000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "000U0000000000000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "00U00000000000000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "0U000000000000000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u64_tuple(
+            "U0000000000000000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+    }
+
+    #[test]
+    fn parse_crockford_u128_region_coverage() {
+        single_parse_crockford_u128(
+            "0000000000000000000000000U",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "000000000000000000000000U0",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "00000000000000000000000U00",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "0000000000000000000000U000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "000000000000000000000U0000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "00000000000000000000U00000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "0000000000000000000U000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "000000000000000000U0000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "00000000000000000U00000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "0000000000000000U000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "000000000000000U0000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "00000000000000U00000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "0000000000000U000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "000000000000U0000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "00000000000U00000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "0000000000U000000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "000000000U0000000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "00000000U00000000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "0000000U000000000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "000000U0000000000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "00000U00000000000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "0000U000000000000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "000U0000000000000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "00U00000000000000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "0U000000000000000000000000",
+            Err(DecodingError::InvalidChar('U')),
+        );
+        single_parse_crockford_u128(
+            "U0000000000000000000000000",
+            Err(DecodingError::InvalidChar('U')),
         );
     }
 
