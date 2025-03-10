@@ -884,7 +884,6 @@ impl From<[u8; 16]> for Ulid {
     ///
     /// assert_eq!(ulid, expected_ulid);
     /// ```
-    #[must_use]
     fn from(bytes: [u8; 16]) -> Self {
         #[rustfmt::skip]
         let high = (u64::from(bytes[0]) << 56)
@@ -944,7 +943,6 @@ impl From<Ulid> for [u8; 16] {
     /// assert_eq!(bytes, expected_bytes);
     /// ```
     #[rustfmt::skip]
-    #[must_use]
     fn from(ulid: Ulid) -> Self {
         let value = ulid.value;
 
@@ -995,7 +993,6 @@ impl From<(u64, u64)> for Ulid {
     ///
     /// assert_eq!(ulid, expected_ulid);
     /// ```
-    #[must_use]
     fn from(value: (u64, u64)) -> Self {
         Self { value }
     }
@@ -1027,7 +1024,6 @@ impl From<Ulid> for (u64, u64) {
     ///
     /// assert_eq!(tuple, expected_tuple);
     /// ```
-    #[must_use]
     fn from(ulid: Ulid) -> Self {
         ulid.value
     }
@@ -1059,7 +1055,6 @@ impl From<u128> for Ulid {
     ///
     /// assert_eq!(ulid, expected_ulid);
     /// ```
-    #[must_use]
     fn from(value: u128) -> Self {
         let value = ((value >> 64) as u64, (value & 0xFFFF_FFFF_FFFF_FFFF) as u64);
         Self { value }
@@ -1092,7 +1087,6 @@ impl From<Ulid> for u128 {
     ///
     /// assert_eq!(value, expected_value);
     /// ```
-    #[must_use]
     fn from(ulid: Ulid) -> Self {
         (Self::from(ulid.value.0) << 64) | Self::from(ulid.value.1)
     }
