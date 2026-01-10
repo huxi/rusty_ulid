@@ -2,10 +2,10 @@ use std::borrow::Cow;
 
 /// Provides integration for JsonSchema based data annotation.
 use crate::Ulid;
-use schemars::json_schema;
 use schemars::JsonSchema;
 use schemars::Schema;
 use schemars::SchemaGenerator;
+use schemars::json_schema;
 
 impl JsonSchema for Ulid {
     fn schema_name() -> Cow<'static, str> {

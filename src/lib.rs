@@ -180,7 +180,7 @@ use std::fmt;
 use std::str::FromStr;
 
 #[cfg(feature = "serde")]
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de};
 #[cfg(feature = "rocket")]
 mod rocket_;
 #[cfg(feature = "schemars")]
@@ -1236,7 +1236,7 @@ mod doc_tests {
 #[cfg(all(test, feature = "serde"))]
 mod serde_tests {
     use super::*;
-    use serde_test::{assert_de_tokens_error, assert_tokens, Compact, Readable, Token};
+    use serde_test::{Compact, Readable, Token, assert_de_tokens_error, assert_tokens};
 
     #[test]
     fn test_serde_readable() {
@@ -1340,7 +1340,7 @@ mod tests {
 
     #[cfg(feature = "rand")]
     mod mock_rand {
-        use rand::{rand_core::impls, RngCore};
+        use rand::{RngCore, rand_core::impls};
 
         /// local copy of deprecated StepRng from rand
         pub(super) struct StepRng {

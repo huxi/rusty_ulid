@@ -1,6 +1,6 @@
 use pretty_assertions::assert_eq;
 use rusty_ulid::Ulid;
-use schemars::{schema_for, JsonSchema, Schema};
+use schemars::{JsonSchema, Schema, schema_for};
 use std::error::Error;
 use std::fs;
 
