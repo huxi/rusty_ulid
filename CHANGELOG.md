@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased][unreleased]
 ### Changed
 - `cargo update`
-- minimal Rust version is now 1.74.0
+- criterion 0.8
+- minimal Rust version is now 1.86
 
 ## [2.0.0] - 2023-01-28
 ### Added
