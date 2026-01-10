@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - criterion 0.8
 - minimal Rust version is now 1.86
 - schemars 1
+- rand 0.9
 
 ## [2.0.0] - 2023-01-28
 ### Added

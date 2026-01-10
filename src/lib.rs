@@ -276,7 +276,7 @@ impl Ulid {
     #[cfg(all(feature = "rand", any(feature = "chrono", feature = "time")))]
     #[must_use]
     pub fn generate() -> Self {
-        Self::from_timestamp_with_rng(unix_epoch_ms(), &mut rand::thread_rng())
+        Self::from_timestamp_with_rng(unix_epoch_ms(), &mut rand::rng())
     }
 
     /// Creates the next monotonic ULID for the given `previous_ulid`.
@@ -304,7 +304,7 @@ impl Ulid {
         Self::next_monotonic_from_timestamp_with_rng(
             previous_ulid,
             unix_epoch_ms(),
-            &mut rand::thread_rng(),
+            &mut rand::rng(),
         )
     }
 
@@ -334,7 +334,7 @@ impl Ulid {
         Self::next_strictly_monotonic_from_timestamp_with_rng(
             previous_ulid,
             unix_epoch_ms(),
-            &mut rand::thread_rng(),
+            &mut rand::rng(),
         )
     }
 
@@ -365,8 +365,8 @@ impl Ulid {
             panic!("ULID does not support timestamps after +10889-08-02T05:31:50.655Z");
         }
 
-        let high = (timestamp << 16) | u64::from(rng.gen::<u16>());
-        let low = rng.gen::<u64>();
+        let high = (timestamp << 16) | u64::from(rng.random::<u16>());
+        let low = rng.random::<u64>();
         let value = (high, low);
 
         Self { value }
@@ -1338,6 +1338,47 @@ mod serde_tests {
 mod tests {
     use super::*;
 
+    #[cfg(feature = "rand")]
+    mod mock_rand {
+        use rand::{rand_core::impls, RngCore};
+
+        /// local copy of deprecated StepRng from rand
+        pub(super) struct StepRng {
+            v: u64,
+            a: u64,
+        }
+
+        impl StepRng {
+            /// Create a `StepRng`, yielding an arithmetic sequence starting with
+            /// `initial` and incremented by `increment` each time.
+            pub(crate) fn new(initial: u64, increment: u64) -> Self {
+                StepRng {
+                    v: initial,
+                    a: increment,
+                }
+            }
+        }
+
+        impl RngCore for StepRng {
+            #[inline]
+            fn next_u32(&mut self) -> u32 {
+                self.next_u64() as u32
+            }
+
+            #[inline]
+            fn next_u64(&mut self) -> u64 {
+                let res = self.v;
+                self.v = self.v.wrapping_add(self.a);
+                res
+            }
+
+            #[inline]
+            fn fill_bytes(&mut self, dst: &mut [u8]) {
+                impls::fill_bytes_via_next(self, dst)
+            }
+        }
+    }
+
     const PAST_TIMESTAMP: u64 = 1_481_195_424_879;
     const PAST_TIMESTAMP_PART: &str = "01B3F2133F";
 
@@ -1570,7 +1611,7 @@ mod tests {
     #[test]
     #[should_panic(expected = "ULID does not support timestamps after +10889-08-02T05:31:50.655Z")]
     fn y10889_bug() {
-        use rand::rngs::mock::StepRng;
+        use crate::tests::mock_rand::StepRng;
 
         let mut mock_rng = StepRng::new(0, 0);
         let _ = Ulid::from_timestamp_with_rng(0x0001_0000_0000_0000, &mut mock_rng);
@@ -1579,7 +1620,7 @@ mod tests {
     #[cfg(feature = "rand")]
     #[test]
     fn test_from_timestamp_with_rng() {
-        use rand::rngs::mock::StepRng;
+        use crate::tests::mock_rand::StepRng;
 
         let mut mock_rng = StepRng::new(0, 0);
         let ulid = Ulid::from_timestamp_with_rng(0xFFFF_FFFF_FFFF, &mut mock_rng);
@@ -1608,7 +1649,7 @@ mod tests {
         let ulid = Ulid::next_monotonic_from_timestamp_with_rng_and_postprocessor(
             Some(previous_ulid),
             1,
-            &mut rand::thread_rng(),
+            &mut rand::rng(),
             Some(&postprocessor_fn),
         );
 
@@ -1617,7 +1658,7 @@ mod tests {
         let ulid = Ulid::next_monotonic_from_timestamp_with_rng_and_postprocessor(
             None,
             1,
-            &mut rand::thread_rng(),
+            &mut rand::rng(),
             Some(&postprocessor_fn),
         );
 
@@ -1632,7 +1673,7 @@ mod tests {
         let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng_and_postprocessor(
             Some(previous_ulid),
             0,
-            &mut rand::thread_rng(),
+            &mut rand::rng(),
             None,
         );
 
@@ -1642,7 +1683,7 @@ mod tests {
         let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng_and_postprocessor(
             Some(previous_ulid),
             0,
-            &mut rand::thread_rng(),
+            &mut rand::rng(),
             None,
         );
 
@@ -1655,7 +1696,7 @@ mod tests {
         let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng_and_postprocessor(
             Some(previous_ulid),
             0,
-            &mut rand::thread_rng(),
+            &mut rand::rng(),
             None,
         );
 
@@ -1675,7 +1716,7 @@ mod tests {
         let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng_and_postprocessor(
             Some(previous_ulid),
             1,
-            &mut rand::thread_rng(),
+            &mut rand::rng(),
             Some(&postprocessor_fn),
         );
         let ulid = ulid.unwrap();
@@ -1685,7 +1726,7 @@ mod tests {
         let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng_and_postprocessor(
             None,
             1,
-            &mut rand::thread_rng(),
+            &mut rand::rng(),
             Some(&postprocessor_fn),
         );
         let ulid = ulid.unwrap();
