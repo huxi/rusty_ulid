@@ -509,10 +509,10 @@ impl Ulid {
     where
         R: rand::Rng,
     {
-        if let Some(previous_ulid) = previous_ulid {
-            if previous_ulid.timestamp() == timestamp {
-                return previous_ulid.increment();
-            }
+        if let Some(previous_ulid) = previous_ulid
+            && previous_ulid.timestamp() == timestamp
+        {
+            return previous_ulid.increment();
         }
 
         let result = Self::from_timestamp_with_rng(timestamp, rng);

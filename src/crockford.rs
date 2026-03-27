@@ -51,20 +51,20 @@ static ENCODING_DIGITS: [char; 32] = [
 
 fn resolve_u64_value_for_char(c: char) -> Result<u64, DecodingError> {
     let index = c as usize;
-    if index < DECODING_DIGITS.len() {
-        if let Some(u8_value) = DECODING_DIGITS[index] {
-            return Ok(u64::from(u8_value));
-        }
+    if index < DECODING_DIGITS.len()
+        && let Some(u8_value) = DECODING_DIGITS[index]
+    {
+        return Ok(u64::from(u8_value));
     }
     Err(DecodingError::InvalidChar(c))
 }
 
 fn resolve_u128_value_for_char(c: char) -> Result<u128, DecodingError> {
     let index = c as usize;
-    if index < DECODING_DIGITS.len() {
-        if let Some(u8_value) = DECODING_DIGITS[index] {
-            return Ok(u128::from(u8_value));
-        }
+    if index < DECODING_DIGITS.len()
+        && let Some(u8_value) = DECODING_DIGITS[index]
+    {
+        return Ok(u128::from(u8_value));
     }
     Err(DecodingError::InvalidChar(c))
 }
