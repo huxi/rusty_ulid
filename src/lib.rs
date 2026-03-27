@@ -346,7 +346,7 @@ impl Ulid {
     /// ```
     /// use rusty_ulid::Ulid;
     ///
-    /// let ulid = Ulid::from_timestamp_with_rng(0, &mut rand::thread_rng());
+    /// let ulid = Ulid::from_timestamp_with_rng(0, &mut rand::rng());
     ///
     /// let timestamp = ulid.timestamp();
     ///
@@ -361,6 +361,7 @@ impl Ulid {
     where
         R: rand::Rng,
     {
+        use rand::RngExt;
         if (timestamp & 0xFFFF_0000_0000_0000) != 0 {
             panic!("ULID does not support timestamps after +10889-08-02T05:31:50.655Z");
         }
@@ -384,7 +385,7 @@ impl Ulid {
     /// use rusty_ulid::Ulid;
     ///
     /// let previous_ulid = Ulid::from(0);
-    /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::thread_rng());
+    /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::rng());
     ///
     /// assert_eq!(ulid, Ulid::from(1));
     /// ```
@@ -393,7 +394,7 @@ impl Ulid {
     /// use rusty_ulid::Ulid;
     ///
     /// let previous_ulid = Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFE);
-    /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::thread_rng());
+    /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::rng());
     ///
     /// assert_eq!(ulid, Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFF));
     /// ```
@@ -402,7 +403,7 @@ impl Ulid {
     /// use rusty_ulid::Ulid;
     ///
     /// let previous_ulid = Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFF);
-    /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::thread_rng());
+    /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::rng());
     ///
     /// // overflow results in zero random part
     /// assert_eq!(ulid, Ulid::from(0));
@@ -442,7 +443,7 @@ impl Ulid {
     /// use rusty_ulid::Ulid;
     ///
     /// let previous_ulid = Ulid::from(0);
-    /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng_and_postprocessor(Some(previous_ulid), 0, &mut rand::thread_rng(), None);
+    /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng_and_postprocessor(Some(previous_ulid), 0, &mut rand::rng(), None);
     ///
     /// assert_eq!(ulid, Ulid::from(1));
     /// ```
@@ -451,7 +452,7 @@ impl Ulid {
     /// use rusty_ulid::Ulid;
     ///
     /// let previous_ulid = Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFE);
-    /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng_and_postprocessor(Some(previous_ulid), 0, &mut rand::thread_rng(), None);
+    /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng_and_postprocessor(Some(previous_ulid), 0, &mut rand::rng(), None);
     ///
     /// assert_eq!(ulid, Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFF));
     /// ```
@@ -460,7 +461,7 @@ impl Ulid {
     /// use rusty_ulid::Ulid;
     ///
     /// let previous_ulid = Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFF);
-    /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng_and_postprocessor(Some(previous_ulid), 0, &mut rand::thread_rng(), None);
+    /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng_and_postprocessor(Some(previous_ulid), 0, &mut rand::rng(), None);
     ///
     /// // overflow results in zero random part
     /// assert_eq!(ulid, Ulid::from(0));
@@ -478,7 +479,7 @@ impl Ulid {
     /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng_and_postprocessor(
     ///     Some(previous_ulid),
     ///     1,
-    ///     &mut rand::thread_rng(),
+    ///     &mut rand::rng(),
     ///     Some(&postprocessor_fn),
     /// );
     ///
@@ -487,7 +488,7 @@ impl Ulid {
     /// let ulid = Ulid::next_monotonic_from_timestamp_with_rng_and_postprocessor(
     ///     None,
     ///     1,
-    ///     &mut rand::thread_rng(),
+    ///     &mut rand::rng(),
     ///     Some(&postprocessor_fn),
     /// );
     ///
@@ -529,7 +530,7 @@ impl Ulid {
     /// use rusty_ulid::Ulid;
     ///
     /// let previous_ulid = Ulid::from(0);
-    /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::thread_rng());
+    /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::rng());
     ///
     /// assert_eq!(ulid, Some(Ulid::from(1)));
     /// ```
@@ -538,7 +539,7 @@ impl Ulid {
     /// use rusty_ulid::Ulid;
     ///
     /// let previous_ulid = Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFE);
-    /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::thread_rng());
+    /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::rng());
     ///
     /// assert_eq!(ulid, Some(Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFF)));
     /// ```
@@ -547,7 +548,7 @@ impl Ulid {
     /// use rusty_ulid::Ulid;
     ///
     /// let previous_ulid = Ulid::from(0x0000_0000_0000_FFFF_FFFF_FFFF_FFFF_FFFF);
-    /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::thread_rng());
+    /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng(previous_ulid, 0, &mut rand::rng());
     ///
     /// // overflow results in None
     /// assert_eq!(ulid, None);
@@ -588,7 +589,7 @@ impl Ulid {
     /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng_and_postprocessor(
     ///     Some(previous_ulid),
     ///     0,
-    ///     &mut rand::thread_rng(),
+    ///     &mut rand::rng(),
     ///     None,
     /// );
     ///
@@ -602,7 +603,7 @@ impl Ulid {
     /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng_and_postprocessor(
     ///     Some(previous_ulid),
     ///     0,
-    ///     &mut rand::thread_rng(),
+    ///     &mut rand::rng(),
     ///     None,
     /// );
     ///
@@ -619,7 +620,7 @@ impl Ulid {
     /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng_and_postprocessor(
     ///     Some(previous_ulid),
     ///     0,
-    ///     &mut rand::thread_rng(),
+    ///     &mut rand::rng(),
     ///     None,
     /// );
     ///
@@ -639,7 +640,7 @@ impl Ulid {
     /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng_and_postprocessor(
     ///     Some(previous_ulid),
     ///     1,
-    ///     &mut rand::thread_rng(),
+    ///     &mut rand::rng(),
     ///     Some(&postprocessor_fn),
     /// );
     /// let ulid = ulid.unwrap();
@@ -649,7 +650,7 @@ impl Ulid {
     /// let ulid = Ulid::next_strictly_monotonic_from_timestamp_with_rng_and_postprocessor(
     ///     None,
     ///     1,
-    ///     &mut rand::thread_rng(),
+    ///     &mut rand::rng(),
     ///     Some(&postprocessor_fn),
     /// );
     /// let ulid = ulid.unwrap();
@@ -1340,41 +1341,36 @@ mod tests {
 
     #[cfg(feature = "rand")]
     mod mock_rand {
-        use rand::{RngCore, rand_core::impls};
+        use core::convert::Infallible;
+        use rand::TryRng;
 
-        /// local copy of deprecated StepRng from rand
-        pub(super) struct StepRng {
-            v: u64,
-            a: u64,
-        }
+        /// local copy of StepRng from rand
+        #[derive(Clone)]
+        pub(super) struct StepRng(u64, u64);
 
         impl StepRng {
             /// Create a `StepRng`, yielding an arithmetic sequence starting with
             /// `initial` and incremented by `increment` each time.
             pub(crate) fn new(initial: u64, increment: u64) -> Self {
-                StepRng {
-                    v: initial,
-                    a: increment,
-                }
+                StepRng(initial, increment)
             }
         }
 
-        impl RngCore for StepRng {
-            #[inline]
-            fn next_u32(&mut self) -> u32 {
-                self.next_u64() as u32
+        impl TryRng for StepRng {
+            type Error = Infallible;
+
+            fn try_next_u32(&mut self) -> Result<u32, Infallible> {
+                self.try_next_u64().map(|x| x as u32)
             }
 
-            #[inline]
-            fn next_u64(&mut self) -> u64 {
-                let res = self.v;
-                self.v = self.v.wrapping_add(self.a);
-                res
+            fn try_next_u64(&mut self) -> Result<u64, Infallible> {
+                let res = self.0;
+                self.0 = self.0.wrapping_add(self.1);
+                Ok(res)
             }
 
-            #[inline]
-            fn fill_bytes(&mut self, dst: &mut [u8]) {
-                impls::fill_bytes_via_next(self, dst)
+            fn try_fill_bytes(&mut self, dst: &mut [u8]) -> Result<(), Infallible> {
+                rand::rand_core::utils::fill_bytes_via_next_word(dst, || self.try_next_u64())
             }
         }
     }

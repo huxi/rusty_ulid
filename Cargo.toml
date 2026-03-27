@@ -9,7 +9,7 @@ repository = "https://github.com/huxi/rusty_ulid"
 license = "MIT/Apache-2.0"
 readme = "README.md"
 edition = "2024"
-rust-version = "1.86"
+rust-version = "1.88"
 
 keywords = ["ulid", "uuid", "sortable", "identifier"]
 categories = [
@@ -26,7 +26,7 @@ categories = [
 default = ["rand", "time", "serde"]
 
 [dependencies]
-rand = { version = "0.9", optional = true }
+rand = { version = "0.10", optional = true }
 time = { version = "0.3", optional = true, default-features = false, features = ["std", "formatting"] }
 chrono = { version = "0.4", optional = true, default-features = false, features = ["std", "clock"] }
 serde = { version = "1", optional = true }

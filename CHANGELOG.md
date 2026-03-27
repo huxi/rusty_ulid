@@ -9,9 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - `cargo update`
 - criterion 0.8
-- minimal Rust version is now 1.86
+- minimal Rust version is now 1.88
 - schemars 1
-- rand 0.9
+- rand 0.10
 - edition = “2024”
 
 ## [2.0.0] - 2023-01-28
