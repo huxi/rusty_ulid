@@ -1258,7 +1258,7 @@ checksum = "cf54715a573b99ac80df0bc206da022bcd442c974952c7b9720069370852e21f"
 
 [[package]]
 name = "rusty_ulid"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "chrono",
  "criterion",
