@@ -29,4 +29,4 @@ all *FLAGS:
 
 # perform a build using Minimum Supported Rust Version toolchain
 msrv *FLAGS:
-    just build "+1.88" {{FLAGS}}
+    just build "+1.95" {{FLAGS}}
