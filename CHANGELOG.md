@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased][unreleased]
+
+## [2.0.2] - 2026-11-14
 ### Changed
 - minimal Rust version is now 1.95
 - `cargo update`
@@ -206,7 +208,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Everything. This was the initial release.
 
-[unreleased]: https://github.com/huxi/rusty_ulid/compare/2.0.1...HEAD
+[unreleased]: https://github.com/huxi/rusty_ulid/compare/2.0.2...HEAD
+[2.0.2]: https://github.com/huxi/rusty_ulid/compare/2.0.1...2.0.2
 [2.0.1]: https://github.com/huxi/rusty_ulid/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/huxi/rusty_ulid/compare/1.0.0...2.0.0
 [1.0.0]: https://github.com/huxi/rusty_ulid/compare/0.11.0...1.0.0
